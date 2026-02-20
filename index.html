@@ -56,32 +56,32 @@
         </div>
 
         <!-- Search Bar -->
-        <div class="bg-white/90 backdrop-blur shadow-lg border border-slate-200 rounded-xl p-2 relative">
+        <div class="bg-white/90 backdrop-blur shadow-lg border border-slate-200 rounded-xl p-2 relative z-20">
             <div class="relative">
                 <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
                 <input type="text" id="searchInput" placeholder="Search people or titles..." 
                     class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
             </div>
             <!-- Search Results Dropdown -->
-            <div id="searchResults" class="absolute top-full left-0 w-full mt-2 bg-white border border-slate-200 shadow-xl rounded-xl overflow-hidden max-h-60 overflow-y-auto hidden">
+            <div id="searchResults" class="absolute top-full left-0 w-full mt-2 bg-white border border-slate-200 shadow-xl rounded-xl overflow-hidden max-h-60 overflow-y-auto hidden z-30">
                 <!-- Results injected here -->
             </div>
         </div>
 
         <!-- Explore Structure Filters -->
-        <div class="bg-white/90 backdrop-blur shadow-lg border border-slate-200 rounded-xl p-4 relative">
-            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Explore Structure</h3>
-            <div class="flex flex-col gap-2">
-                <select id="divisionSelect" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-slate-700">
-                    <option value="">-- Select Division --</option>
-                </select>
-                <select id="branchSelect" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-slate-700 hidden">
+        <div class="bg-white/90 backdrop-blur shadow-lg border border-slate-200 rounded-xl p-4 relative z-10">
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Explore Divisions</h3>
+            <div id="divisionButtons" class="flex flex-wrap gap-2 mb-3">
+                <!-- Division Buttons injected here -->
+            </div>
+            <div id="branchFilterContainer" class="hidden flex flex-col gap-2">
+                <select id="branchSelect" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-slate-700">
                     <option value="">-- Select Branch --</option>
                 </select>
-                <button onclick="resetFilters()" class="w-full mt-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 rounded-lg text-xs transition-colors">
-                    Reset View
-                </button>
             </div>
+            <button onclick="resetFilters()" class="w-full mt-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 rounded-lg text-xs transition-colors">
+                Reset View
+            </button>
         </div>
     </div>
 
@@ -187,6 +187,18 @@ NRRIS,Digital Services,Arthur Curry,Band 3,213000,Manager UX Design,210000,Clark
 NRRIS,Digital Services,Hal Jordan,IS 24,213001,Lead Designer,213000,Arthur Curry
 NRRIS,Digital Services,Mera Curry,IS 21,213002,UX Researcher,213000,Arthur Curry
 NRRIS,Digital Services,Garth Tempest,IS 21,213003,UI Designer,213000,Arthur Curry
+NRRIS,Digital Services,Ororo Munroe,Band 4,214000,Director Quality Assurance,210000,Clark Kent
+NRRIS,Digital Services,Logan Howlett,IS 27,214001,Lead QA Engineer,214000,Ororo Munroe
+NRRIS,Digital Services,Scott Summers,IS 24,214002,QA Automation Engineer,214000,Ororo Munroe
+NRRIS,Digital Services,Jean Grey,IS 24,214003,QA Analyst,214000,Ororo Munroe
+NRRIS,Digital Services,Kurt Wagner,IS 21,214004,Junior Tester,214000,Ororo Munroe
+NRRIS,Digital Services,Anna Marie,IS 21,214005,Junior Tester,214000,Ororo Munroe
+NRRIS,Digital Services,Hank McCoy,Band 4,215000,Director DevOps,210000,Clark Kent
+NRRIS,Digital Services,Bobby Drake,IS 27,215001,Lead DevOps Engineer,215000,Hank McCoy
+NRRIS,Digital Services,Warren Worthington,IS 24,215002,SRE Engineer,215000,Hank McCoy
+NRRIS,Digital Services,Alex Summers,IS 24,215003,Cloud Ops Specialist,215000,Hank McCoy
+NRRIS,Digital Services,Lorna Dane,IS 21,215004,Release Manager,215000,Hank McCoy
+NRRIS,Digital Services,Sean Cassidy,IS 21,215005,SysAdmin,215000,Hank McCoy
 NRRIS,Client Services,Diana Prince,Band 5,220000,Executive Director,200000,Rohan Rahman
 NRRIS,Client Services,Steve Trevor,Band 4,221000,Director Client Relations,220000,Diana Prince
 NRRIS,Client Services,Etta Candy,AO 24,221001,Client Service Liaison,221000,Steve Trevor
@@ -205,6 +217,13 @@ NRRIS,Data & Analytics,Roy Harper,Band 4,232000,Director BI & Reporting,230000,O
 NRRIS,Data & Analytics,Thea Queen,IS 24,232001,BI Developer,232000,Roy Harper
 NRRIS,Data & Analytics,Mia Smoak,IS 21,232002,Data Analyst,232000,Roy Harper
 NRRIS,Data & Analytics,Connor Hawke,IS 21,232003,Data Analyst,232000,Roy Harper
+NRRIS,Data & Analytics,Emma Frost,Band 4,233000,Director Data Engineering,230000,Oliver Queen
+NRRIS,Data & Analytics,Piotr Rasputin,IS 27,233001,Lead Data Engineer,233000,Emma Frost
+NRRIS,Data & Analytics,Illyana Rasputin,IS 24,233002,Data Pipeline Dev,233000,Emma Frost
+NRRIS,Data & Analytics,Kitty Pryde,IS 24,233003,ETL Specialist,233000,Emma Frost
+NRRIS,Data & Analytics,Jubilation Lee,IS 21,233004,Data Support Analyst,233000,Emma Frost
+NRRIS,Data & Analytics,Remy LeBeau,IS 21,233005,Data Support Analyst,233000,Emma Frost
+NRRIS,Data & Analytics,Alison Blaire,IS 21,233006,Junior Data Engineer,233000,Emma Frost
 CSNR,ADM Office,Liam McIntyre,ADM,300000,Assistant Deputy Minister,100000,Julien Santos
 CSNR,ADM Office,Kara Danvers,AO 18,300001,Divisional Coordinator,300000,Liam McIntyre
 CSNR,Financial Services,Miguel Petrov,Band 5,310000,Executive Director,300000,Liam McIntyre
@@ -212,9 +231,20 @@ CSNR,Financial Services,John Constantine,Band 4,311000,Director Accounting,31000
 CSNR,Financial Services,Chas Chandler,FO 24,311001,Senior Accountant,311000,John Constantine
 CSNR,Financial Services,Zed Martin,FO 21,311002,Financial Analyst,311000,John Constantine
 CSNR,Financial Services,Gary Lester,FO 18,311003,Payroll Clerk,311000,John Constantine
+CSNR,Financial Services,Vision,FO 21,311004,Accounts Payable Specialist,311000,John Constantine
+CSNR,Financial Services,Pietro Maximoff,FO 21,311005,Accounts Receivable Specialist,311000,John Constantine
+CSNR,Financial Services,Carol Danvers,FO 21,311006,Reconciliation Analyst,311000,John Constantine
+CSNR,Financial Services,Monica Rambeau,FO 18,311007,Accounting Clerk,311000,John Constantine
+CSNR,Financial Services,Kamala Khan,FO 18,311008,Accounting Clerk,311000,John Constantine
 CSNR,Financial Services,Ray Palmer,Band 4,312000,Director Procurement,310000,Miguel Petrov
 CSNR,Financial Services,Carter Hall,AO 24,312001,Senior Procurement Officer,312000,Ray Palmer
 CSNR,Financial Services,Kendra Saunders,AO 21,312002,Procurement Officer,312000,Ray Palmer
+CSNR,Financial Services,Bruce Banner,Band 4,313000,Director Budgeting,310000,Miguel Petrov
+CSNR,Financial Services,Natasha Romanoff,FO 24,313001,Senior Budget Analyst,313000,Bruce Banner
+CSNR,Financial Services,Clint Barton,FO 24,313002,Financial Forecaster,313000,Bruce Banner
+CSNR,Financial Services,Sam Wilson,FO 21,313003,Budget Coordinator,313000,Bruce Banner
+CSNR,Financial Services,Bucky Barnes,FO 21,313004,Budget Analyst,313000,Bruce Banner
+CSNR,Financial Services,Wanda Maximoff,FO 18,313005,Finance Clerk,313000,Bruce Banner
 CSNR,People & Culture,Mei Lin,Band 5,320000,Executive Director,300000,Liam McIntyre
 CSNR,People & Culture,Lucius Fox,Band 4,321000,Director Talent Acquisition,320000,Mei Lin
 CSNR,People & Culture,Rachel Dawes,AO 24,321001,Senior Recruiter,321000,Lucius Fox
@@ -222,30 +252,84 @@ CSNR,People & Culture,Harvey Dent,AO 21,321002,Technical Recruiter,321000,Lucius
 CSNR,People & Culture,Carmine Falcone,Band 4,322000,Director Employee Relations,320000,Mei Lin
 CSNR,People & Culture,Sal Maroni,AO 24,322001,HR Business Partner,322000,Carmine Falcone
 CSNR,People & Culture,Sofia Falcone,AO 21,322002,HR Generalist,322000,Carmine Falcone
+CSNR,People & Culture,Stephen Strange,Band 4,323000,Director Learning & Dev,320000,Mei Lin
+CSNR,People & Culture,Wong,AO 24,323001,Senior Training Specialist,323000,Stephen Strange
+CSNR,People & Culture,America Chavez,AO 21,323002,Training Coordinator,323000,Stephen Strange
+CSNR,People & Culture,Clea,AO 21,323003,Instructional Designer,323000,Stephen Strange
+CSNR,People & Culture,Karl Mordo,AO 21,323004,E-Learning Developer,323000,Stephen Strange
+CSNR,People & Culture,Reed Richards,Band 4,324000,Director Comp & Benefits,320000,Mei Lin
+CSNR,People & Culture,Sue Storm,AO 24,324001,Senior Benefits Analyst,324000,Reed Richards
+CSNR,People & Culture,Johnny Storm,AO 21,324002,Compensation Analyst,324000,Reed Richards
+CSNR,People & Culture,Ben Grimm,AO 21,324003,Pensions Administrator,324000,Reed Richards
+CSNR,People & Culture,Victor Von Doom,AO 18,324004,Benefits Clerk,324000,Reed Richards
 CSNR,Legal & Privacy,Dinah Lance,Band 5,330000,Executive Director,300000,Liam McIntyre
 CSNR,Legal & Privacy,Alec Holland,Band 4,331000,Director Privacy Compliance,330000,Dinah Lance
 CSNR,Legal & Privacy,Abby Arcane,AO 24,331001,Senior FOIPPA Analyst,331000,Alec Holland
 CSNR,Legal & Privacy,Matt Cable,AO 21,331002,Privacy Analyst,331000,Alec Holland
+CSNR,Corporate IT,Tony Stark,Band 5,340000,Executive Director IT,300000,Liam McIntyre
+CSNR,Corporate IT,James Rhodes,Band 4,341000,Director Service Desk,340000,Tony Stark
+CSNR,Corporate IT,Pepper Potts,IS 24,341001,IT Service Manager,341000,James Rhodes
+CSNR,Corporate IT,Happy Hogan,IS 21,341002,Tier 2 Support,341000,James Rhodes
+CSNR,Corporate IT,Peter Parker,IS 21,341003,Tier 1 Support,341000,James Rhodes
+CSNR,Corporate IT,Ned Leeds,IS 21,341004,Tier 1 Support,341000,James Rhodes
+CSNR,Corporate IT,MJ Watson,IS 21,341005,Tier 1 Support,341000,James Rhodes
+CSNR,Corporate IT,Flash Thompson,IS 18,341006,Helpdesk Trainee,341000,James Rhodes
 ENV,ADM Office,Sarah Connor,ADM,400000,Assistant Deputy Minister,100000,Julien Santos
 ENV,ADM Office,John Connor,AO 18,400001,Divisional Coordinator,400000,Sarah Connor
 ENV,Climate Action,Kyle Reese,Band 5,410000,Executive Director,400000,Sarah Connor
 ENV,Climate Action,Miles Dyson,Band 4,411000,Director Emissions Tracking,410000,Kyle Reese
 ENV,Climate Action,Tarissa Dyson,IS 24,411001,Environmental Data Analyst,411000,Miles Dyson
 ENV,Climate Action,Danny Dyson,IS 21,411002,Junior Data Analyst,411000,Miles Dyson
+ENV,Climate Action,Matt Murdock,Band 4,412000,Director Climate Policy,410000,Kyle Reese
+ENV,Climate Action,Foggy Nelson,AO 24,412001,Senior Policy Analyst,412000,Matt Murdock
+ENV,Climate Action,Karen Page,AO 24,412002,Policy Advisor,412000,Matt Murdock
+ENV,Climate Action,Frank Castle,AO 21,412003,Regulatory Specialist,412000,Matt Murdock
+ENV,Climate Action,Elektra Natchios,AO 21,412004,Policy Researcher,412000,Matt Murdock
+ENV,Climate Action,Claire Temple,AO 21,412005,Consultation Coordinator,412000,Matt Murdock
 ENV,Conservation,Marcus Wright,Band 5,420000,Executive Director,400000,Sarah Connor
 ENV,Conservation,Blair Williams,Band 4,421000,Director Wildlife Protection,420000,Marcus Wright
 ENV,Conservation,Barnes,AO 24,421001,Senior Conservation Officer,421000,Blair Williams
 ENV,Conservation,Star,AO 21,421002,Conservation Officer,421000,Blair Williams
+ENV,Conservation,Luke Cage,Band 4,422000,Director Park Rangers,420000,Marcus Wright
+ENV,Conservation,Danny Rand,AO 24,422001,Senior Regional Ranger,422000,Luke Cage
+ENV,Conservation,Jessica Jones,AO 24,422002,Senior Regional Ranger,422000,Luke Cage
+ENV,Conservation,Colleen Wing,AO 21,422003,Park Ranger,422000,Luke Cage
+ENV,Conservation,Misty Knight,AO 21,422004,Park Ranger,422000,Luke Cage
+ENV,Conservation,Ward Meachum,AO 21,422005,Park Ranger,422000,Luke Cage
+ENV,Conservation,Joy Meachum,AO 21,422006,Park Ranger,422000,Luke Cage
+ENV,Conservation,Davos,AO 18,422007,Seasonal Ranger,422000,Luke Cage
+ENV,Conservation,Mary Walker,AO 18,422008,Seasonal Ranger,422000,Luke Cage
 FOR,ADM Office,Marcus Usman,ADM,500000,Assistant Deputy Minister,100000,Julien Santos
 FOR,ADM Office,Elena Fisher,AO 18,500001,Divisional Coordinator,500000,Marcus Usman
 FOR,Timber Operations,Nathan Drake,Band 5,510000,Executive Director,500000,Marcus Usman
 FOR,Timber Operations,Victor Sullivan,Band 4,511000,Director Forestry Planning,510000,Nathan Drake
 FOR,Timber Operations,Chloe Frazer,AO 24,511001,Senior Forestry Planner,511000,Victor Sullivan
 FOR,Timber Operations,Samuel Drake,AO 21,511002,Forestry Technician,511000,Victor Sullivan
+FOR,Timber Operations,Peter Quill,Band 4,512000,Director Silviculture,510000,Nathan Drake
+FOR,Timber Operations,Gamora,AO 24,512001,Senior Forester,512000,Peter Quill
+FOR,Timber Operations,Drax,AO 24,512002,Reforestation Specialist,512000,Peter Quill
+FOR,Timber Operations,Rocket,AO 21,512003,Silviculture Technician,512000,Peter Quill
+FOR,Timber Operations,Groot,AO 21,512004,Silviculture Technician,512000,Peter Quill
+FOR,Timber Operations,Mantis,AO 18,512005,Field Assistant,512000,Peter Quill
+FOR,Timber Operations,Nebula,Band 4,513000,Director Licensing,510000,Nathan Drake
+FOR,Timber Operations,Yondu Udonta,AO 24,513001,Senior Licensing Officer,513000,Nebula
+FOR,Timber Operations,Kraglin Obfonteri,AO 21,513002,Licensing Officer,513000,Nebula
+FOR,Timber Operations,Taserface,AO 21,513003,Permit Coordinator,513000,Nebula
+FOR,Timber Operations,Cosmo,AO 18,513004,Licensing Clerk,513000,Nebula
 FOR,Wildfire Management,Nadine Ross,Band 5,520000,Executive Director,500000,Marcus Usman
 FOR,Wildfire Management,Rafe Adler,Band 4,521000,Director Wildfire Response,520000,Nadine Ross
 FOR,Wildfire Management,Harry Flynn,AO 24,521001,Logistics Coordinator,521000,Rafe Adler
 FOR,Wildfire Management,Charlie Cutter,AO 21,521002,Response Technician,521000,Rafe Adler
+FOR,Wildfire Management,Thor Odinson,Band 4,522000,Director Fire Prevention,520000,Nadine Ross
+FOR,Wildfire Management,Loki Laufeyson,AO 24,522001,Senior Mitigation Specialist,522000,Thor Odinson
+FOR,Wildfire Management,Valkyrie,AO 24,522002,Community Outreach Coord,522000,Thor Odinson
+FOR,Wildfire Management,Heimdall,AO 21,522003,Risk Assessment Officer,522000,Thor Odinson
+FOR,Wildfire Management,Sif,AO 21,522004,Fire Warden,522000,Thor Odinson
+FOR,Wildfire Management,Odin Borson,Band 4,523000,Director Aviation Ops,520000,Nadine Ross
+FOR,Wildfire Management,Frigga,AO 24,523001,Chief Dispatcher,523000,Odin Borson
+FOR,Wildfire Management,Balder,AO 24,523002,Aviation Safety Officer,523000,Odin Borson
+FOR,Wildfire Management,Tyr,AO 21,523003,Flight Coordinator,523000,Odin Borson
+FOR,Wildfire Management,Hela,AO 21,523004,Air Attack Officer,523000,Odin Borson
 WLRS,ADM Office,John Doe,ADM,600000,Assistant Deputy Minister,100000,Julien Santos
 WLRS,ADM Office,Jane Smith,AO 18,600001,Divisional Coordinator,600000,John Doe
 WLRS,Water Management,Alan Grant,Band 5,610000,Executive Director,600000,John Doe
@@ -255,7 +339,18 @@ WLRS,Water Management,John Hammond,AO 24,611002,Resource Analyst,611000,Ellie Sa
 WLRS,Land Stewardship,Lex Murphy,Band 5,620000,Executive Director,600000,John Doe
 WLRS,Land Stewardship,Tim Murphy,Band 4,621000,Director Land Use,620000,Lex Murphy
 WLRS,Land Stewardship,Donald Gennaro,AO 24,621001,Land Policy Analyst,621000,Tim Murphy
-WLRS,Land Stewardship,Dennis Nedry,IS 24,621002,GIS Specialist,621000,Tim Murphy`;
+WLRS,Land Stewardship,Dennis Nedry,IS 24,621002,GIS Specialist,621000,Tim Murphy
+WLRS,Land Stewardship,T'Challa,Band 4,622000,Director Land Permitting,620000,Lex Murphy
+WLRS,Land Stewardship,Shuri,AO 24,622001,Senior Permitting Officer,622000,T'Challa
+WLRS,Land Stewardship,Okoye,AO 24,622002,Land Inspector,622000,T'Challa
+WLRS,Land Stewardship,Nakia,AO 21,622003,Permitting Analyst,622000,T'Challa
+WLRS,Land Stewardship,M'Baku,AO 21,622004,Permit Coordinator,622000,T'Challa
+WLRS,Land Stewardship,Ramonda,AO 18,622005,Permitting Clerk,622000,T'Challa
+WLRS,Land Stewardship,Erik Killmonger,Band 4,623000,Director Indigenous Relations,620000,Lex Murphy
+WLRS,Land Stewardship,W'Kabi,AO 24,623001,Senior Engagement Advisor,623000,Erik Killmonger
+WLRS,Land Stewardship,Ayo,AO 24,623002,Consultation Specialist,623000,Erik Killmonger
+WLRS,Land Stewardship,Aneka,AO 21,623003,Engagement Coordinator,623000,Erik Killmonger
+WLRS,Land Stewardship,Zuri,AO 21,623004,Policy Advisor,623000,Erik Killmonger`;
 
         // Utility algorithm to assign organizational ranking weight for sorting
         function getClassificationWeight(classification) {
@@ -348,40 +443,47 @@ WLRS,Land Stewardship,Dennis Nedry,IS 24,621002,GIS Specialist,621000,Tim Murphy
         }
 
         // Structure Dropdown Filters Management
+        let activeDivision = "";
+
         function populateFilters() {
-            const divisionSelect = document.getElementById('divisionSelect');
+            const divisionButtonsContainer = document.getElementById('divisionButtons');
             const divisions = [...new Set(globalData.map(d => d.division))].filter(Boolean).sort();
             
-            divisionSelect.innerHTML = '<option value="">-- Select Division --</option>';
+            divisionButtonsContainer.innerHTML = '';
             divisions.forEach(div => {
-                const opt = document.createElement('option');
-                opt.value = div;
-                opt.textContent = div;
-                divisionSelect.appendChild(opt);
+                const btn = document.createElement('button');
+                btn.className = 'px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold rounded-lg transition-colors border border-transparent';
+                btn.textContent = div;
+                btn.onclick = () => selectDivision(div, btn);
+                divisionButtonsContainer.appendChild(btn);
             });
             
-            const branchSelect = document.getElementById('branchSelect');
-            branchSelect.innerHTML = '<option value="">-- Select Branch --</option>';
-            branchSelect.classList.add('hidden');
+            const branchFilterContainer = document.getElementById('branchFilterContainer');
+            branchFilterContainer.classList.add('hidden');
         }
 
-        document.getElementById('divisionSelect').addEventListener('change', function(e) {
-            const selectedDiv = e.target.value;
+        function selectDivision(selectedDiv, btnElement) {
+            activeDivision = selectedDiv;
+            
+            // Update button styles to highlight the active pill
+            const buttons = document.getElementById('divisionButtons').querySelectorAll('button');
+            buttons.forEach(b => {
+                b.classList.remove('bg-blue-100', 'text-blue-700', 'border-blue-300');
+                b.classList.add('bg-slate-100', 'text-slate-600');
+            });
+            btnElement.classList.remove('bg-slate-100', 'text-slate-600');
+            btnElement.classList.add('bg-blue-100', 'text-blue-700', 'border-blue-300');
+
+            const branchFilterContainer = document.getElementById('branchFilterContainer');
             const branchSelect = document.getElementById('branchSelect');
             
-            if (!selectedDiv) {
-                branchSelect.classList.add('hidden');
-                resetFilters();
-                return;
-            }
-
             // Highlight and expand the chosen Division
             highlightTeam('division', selectedDiv);
 
             // Populate the Branch dropdown based on the chosen Division
             const branches = [...new Set(globalData.filter(d => d.division === selectedDiv).map(d => d.branch))].filter(Boolean).sort();
             
-            branchSelect.innerHTML = '<option value="">-- Select Branch --</option>';
+            branchSelect.innerHTML = '<option value="">-- Explore Branches --</option>';
             branches.forEach(branch => {
                 const opt = document.createElement('option');
                 opt.value = branch;
@@ -390,11 +492,11 @@ WLRS,Land Stewardship,Dennis Nedry,IS 24,621002,GIS Specialist,621000,Tim Murphy
             });
             
             if (branches.length > 0) {
-                branchSelect.classList.remove('hidden');
+                branchFilterContainer.classList.remove('hidden');
             } else {
-                branchSelect.classList.add('hidden');
+                branchFilterContainer.classList.add('hidden');
             }
-        });
+        }
 
         document.getElementById('branchSelect').addEventListener('change', function(e) {
             const selectedBranch = e.target.value;
@@ -402,14 +504,34 @@ WLRS,Land Stewardship,Dennis Nedry,IS 24,621002,GIS Specialist,621000,Tim Murphy
                 highlightTeam('branch', selectedBranch);
             } else {
                 // If branch is deselected, fallback to highlighting the current Division
-                highlightTeam('division', document.getElementById('divisionSelect').value);
+                highlightTeam('division', activeDivision);
             }
         });
 
+        function collapseToTopLevel() {
+            chart.collapseAll();
+            
+            // Open default hierarchy (e.g. up to ADMs)
+            const rootNode = globalData.find(d => !d.parentId);
+            if (rootNode) {
+                chart.setExpanded(rootNode.id);
+                // Also expand the direct children so we see the divisions
+                const directChildren = globalData.filter(d => d.parentId === rootNode.id);
+                directChildren.forEach(child => chart.setExpanded(child.id));
+            }
+            
+            chart.render().fit();
+        }
+
         function resetFilters() {
-            // Reset dropdowns
-            document.getElementById('divisionSelect').value = '';
-            document.getElementById('branchSelect').classList.add('hidden');
+            activeDivision = "";
+            const buttons = document.getElementById('divisionButtons').querySelectorAll('button');
+            buttons.forEach(b => {
+                b.classList.remove('bg-blue-100', 'text-blue-700', 'border-blue-300');
+                b.classList.add('bg-slate-100', 'text-slate-600');
+            });
+            
+            document.getElementById('branchFilterContainer').classList.add('hidden');
             document.getElementById('branchSelect').innerHTML = '<option value="">-- Select Branch --</option>';
             
             // Reset search input
@@ -419,20 +541,7 @@ WLRS,Land Stewardship,Dennis Nedry,IS 24,621002,GIS Specialist,621000,Tim Murphy
             // Clear highlights and collapse everything
             chart.clearHighlighting();
             globalData.forEach(d => d._highlightedTeam = false);
-            chart.collapseAll();
-            
-            // Open default hierarchy (e.g. up to ADMs)
-            const rootNode = globalData.find(d => !d.parentId);
-            if (rootNode) chart.setExpanded(rootNode.id);
-            
-            globalData.forEach(node => {
-                const cls = (node.classification || '').toUpperCase();
-                if (cls.includes('ADM')) {
-                    chart.setExpanded(node.id);
-                }
-            });
-            
-            chart.render().fit();
+            collapseToTopLevel();
         }
 
         // Initialize the Chart
@@ -529,9 +638,10 @@ WLRS,Land Stewardship,Dennis Nedry,IS 24,621002,GIS Specialist,621000,Tim Murphy
                     showProfile(d.data);
                     chart.setCentered(d.data.id).render();
                 })
-                .render()
-                .expandAll()
-                .fit();
+                .render();
+
+            // Set the default view to collapsed (Top level only) instead of expandAll
+            collapseToTopLevel();
         }
 
         Papa.parse(defaultCSV, {
