@@ -20,25 +20,21 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
-        /* Custom scrollbar for the search results */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
-        /* Node Animations */
-        .node-card { transition: box-shadow 0.2s, border-color 0.2s; }
+        .node-card { transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s; }
         .node-card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border-color: #94a3b8; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 h-screen w-screen overflow-hidden font-sans selection:bg-blue-200">
 
-    <!-- The Infinite Canvas Container -->
     <div id="chart-container" class="w-full h-full cursor-grab active:cursor-grabbing"></div>
 
-    <!-- Floating UI: Top Left (Controls & Search) -->
+    <!-- Top Left: Controls & Search -->
     <div class="absolute top-4 left-4 w-80 flex flex-col gap-3 z-10">
-        <!-- App Header & File Upload -->
         <div class="bg-white/90 backdrop-blur shadow-lg border border-slate-200 rounded-xl p-5">
             <h1 class="text-lg font-bold text-slate-900 flex items-center gap-2 mb-1">
                 <i data-lucide="network" class="w-5 h-5 text-blue-600"></i>
@@ -55,21 +51,26 @@
             <div id="file-status" class="text-xs text-green-600 mt-2 hidden font-medium text-center">Data loaded successfully!</div>
         </div>
 
-        <!-- Search Bar -->
         <div class="bg-white/90 backdrop-blur shadow-lg border border-slate-200 rounded-xl p-2 relative">
             <div class="relative">
                 <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                <input type="text" id="searchInput" placeholder="Search people or titles..." 
+                <input type="text" id="searchInput" placeholder="Search people or teams..." 
                     class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
             </div>
-            <!-- Search Results Dropdown -->
             <div id="searchResults" class="absolute top-full left-0 w-full mt-2 bg-white border border-slate-200 shadow-xl rounded-xl overflow-hidden max-h-60 overflow-y-auto hidden">
                 <!-- Results injected here -->
             </div>
         </div>
+        
+        <!-- Semantic Depth Toggles -->
+        <div class="flex gap-2">
+            <button onclick="expandSemantic('ADM')" class="flex-1 bg-white shadow border border-slate-200 rounded-lg py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition" title="Show Executives">Level 1 (ADMs)</button>
+            <button onclick="expandSemantic('Band')" class="flex-1 bg-white shadow border border-slate-200 rounded-lg py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition" title="Show Management">Level 2 (Bands)</button>
+            <button onclick="expandSemantic('All')" class="flex-1 bg-white shadow border border-slate-200 rounded-lg py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition" title="Show Everyone">All Staff</button>
+        </div>
     </div>
 
-    <!-- Floating UI: Right Side (Employee Profile Panel) -->
+    <!-- Right Side: Employee Profile Panel -->
     <div id="profilePanel" class="absolute top-4 right-4 w-80 bg-white shadow-2xl border border-slate-200 rounded-xl flex flex-col z-10 transition-transform duration-300 translate-x-[120%] opacity-0 h-[calc(100vh-2rem)]">
         <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 rounded-t-xl">
             <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Employee Profile</h2>
@@ -79,13 +80,10 @@
         </div>
         
         <div class="p-6 flex flex-col items-center border-b border-slate-100">
-            <!-- Avatar Placeholder -->
-            <div id="profileAvatar" class="w-20 h-20 rounded-full bg-blue-100 border-4 border-white shadow-sm flex items-center justify-center text-2xl font-bold text-blue-600 mb-3">
-                JS
-            </div>
-            <h3 id="profileName" class="text-xl font-bold text-slate-900 text-center">Julien Santos</h3>
-            <p id="profileTitle" class="text-sm text-blue-600 font-medium text-center text-center mt-1">Associate Deputy Minister</p>
-            <span id="profileBranch" class="mt-3 px-3 py-1 bg-slate-100 text-slate-600 text-xs font-semibold rounded-full border border-slate-200">Executive</span>
+            <div id="profileAvatar" class="w-20 h-20 rounded-full bg-blue-100 border-4 border-white shadow-sm flex items-center justify-center text-2xl font-bold text-blue-600 mb-3"></div>
+            <h3 id="profileName" class="text-xl font-bold text-slate-900 text-center"></h3>
+            <p id="profileTitle" class="text-sm text-blue-600 font-medium text-center mt-1"></p>
+            <span id="profileBranch" class="mt-3 px-3 py-1 bg-slate-100 text-slate-600 text-xs font-semibold rounded-full border border-slate-200"></span>
         </div>
 
         <div class="p-6 flex-1 overflow-y-auto">
@@ -93,25 +91,25 @@
             <div class="space-y-4">
                 <div>
                     <p class="text-xs text-slate-500 mb-1">Position ID</p>
-                    <p id="profilePosId" class="text-sm font-medium text-slate-800">70717355</p>
+                    <p id="profilePosId" class="text-sm font-medium text-slate-800"></p>
                 </div>
                 <div>
                     <p class="text-xs text-slate-500 mb-1">Department</p>
-                    <p id="profileDept" class="text-sm font-medium text-slate-800">000-0000</p>
+                    <p id="profileDept" class="text-sm font-medium text-slate-800"></p>
                 </div>
                 <div>
                     <p class="text-xs text-slate-500 mb-1">Classification</p>
-                    <p id="profileClass" class="text-sm font-medium text-slate-800">ADM</p>
+                    <p id="profileClass" class="text-sm font-medium text-slate-800"></p>
                 </div>
                 <div>
                     <p class="text-xs text-slate-500 mb-1">Reports To</p>
-                    <p id="profileSupervisor" class="text-sm font-medium text-slate-800">-</p>
+                    <p id="profileSupervisor" class="text-sm font-medium text-slate-800"></p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Floating UI: Bottom Right (Zoom Controls) -->
+    <!-- Bottom Right: Zoom Controls -->
     <div class="absolute bottom-6 right-6 bg-white shadow-lg border border-slate-200 rounded-lg flex flex-col z-10 overflow-hidden">
         <button onclick="chart.zoomIn()" class="p-3 text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-colors border-b border-slate-100" title="Zoom In">
             <i data-lucide="zoom-in" class="w-5 h-5"></i>
@@ -122,7 +120,7 @@
         <button onclick="chart.fit()" class="p-3 text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-colors border-b border-slate-100" title="Fit to Screen">
             <i data-lucide="maximize" class="w-5 h-5"></i>
         </button>
-        <button onclick="chart.expandAll().fit()" class="p-3 text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-colors border-b border-slate-100" title="Expand All">
+        <button onclick="expandSemantic('All')" class="p-3 text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-colors border-b border-slate-100" title="Expand All (Warning: Large)">
             <i data-lucide="unfold-vertical" class="w-5 h-5"></i>
         </button>
         <button onclick="chart.collapseAll().fit()" class="p-3 text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-colors border-b border-slate-100" title="Collapse All">
@@ -137,18 +135,15 @@
     </div>
 
     <script>
-        // Initialize Lucide icons
         lucide.createIcons();
 
         let chart;
         let globalData = [];
-
-        // Fallback Data based on the snippet provided.
-        // Expanded to ~75 employees to demonstrate a larger organization structure.
+        
+        // Expanded Default Data
         const defaultCSV = `Branch,Name,Classification,Position ID,Department,Job Title,Supervisor Position ID,Supervisor Name
 Executive,Julien Santos,ADM,70717355,000-0000,Associate Deputy Minister,,
 Executive,Diana Prince,Band 3,80000001,000-0000,Chief of Staff,70717355,Julien Santos
-Executive,Bruce Wayne,Band 2,80000002,000-0000,Executive Assistant,80000001,Diana Prince
 Digital Services,Rohan Rahman,ADM,72498494,000-0000,Assistant Deputy Minister,70717355,Julien Santos
 Corporate Services,Liam McIntyre,ADM,35488219,000-0000,Assistant Deputy Minister,70717355,Julien Santos
 Infrastructure & Ops,Marcus Usman,ADM,73855860,000-0000,Assistant Deputy Minister,70717355,Julien Santos
@@ -165,70 +160,40 @@ Cybersecurity,Ben Zhao,AO 15,65723278,614-0492,Senior Analyst,73855860,Marcus Us
 Infrastructure & Ops,Julien Kowalski,Band 2,36369108,200-8505,System Admin,73855860,Marcus Usman
 Digital Services,Clark Kent,Band 5,80000003,064-0975,Director UX,72498494,Rohan Rahman
 Digital Services,Barry Allen,Band 5,80000004,064-0975,Director Engineering,72498494,Rohan Rahman
-Digital Services,Arthur Curry,IS 24,80000005,749-2145,Product Manager,12013364,Fatima Rahman
-Digital Services,Victor Stone,IS 21,80000006,749-2145,Business Analyst,12013364,Fatima Rahman
-Digital Services,Hal Jordan,IS 24,80000007,749-2145,Lead Designer,80000003,Clark Kent
-Digital Services,John Stewart,IS 21,80000008,749-2145,UI Designer,80000003,Clark Kent
-Digital Services,Guy Gardner,IS 21,80000009,749-2145,UX Researcher,80000003,Clark Kent
 Digital Services,Wally West,IS 27,80000010,749-2145,Lead Developer,80000004,Barry Allen
 Digital Services,Kyle Rayner,IS 24,80000011,749-2145,Full Stack Dev,80000010,Wally West
-Digital Services,Simon Baz,IS 24,80000012,749-2145,Backend Dev,80000010,Wally West
-Digital Services,Jessica Cruz,IS 21,80000013,749-2145,Frontend Dev,80000010,Wally West
 Corporate Services,Oliver Queen,Band 5,80000014,669-2580,Director Finance,35488219,Liam McIntyre
-Corporate Services,Dinah Lance,Band 5,80000015,669-2580,Director Legal,35488219,Liam McIntyre
-Corporate Services,Ray Palmer,Band 3,80000016,669-2580,Operations Manager,89918134,Miguel Petrov
-Corporate Services,Carter Hall,AO 24,80000017,669-2580,Facilities Coordinator,80000016,Ray Palmer
-Corporate Services,Kendra Saunders,AO 24,80000018,669-2580,Procurement Officer,80000016,Ray Palmer
-Corporate Services,John Constantine,FO 24,80000019,669-2580,Senior Accountant,80000014,Oliver Queen
-Corporate Services,Zatanna Zatara,FO 21,80000020,669-2580,Financial Analyst,80000019,John Constantine
-Corporate Services,Boston Brand,FO 18,80000021,669-2580,Payroll Clerk,80000014,Oliver Queen
-Corporate Services,Alec Holland,Band 3,80000022,669-2580,Senior Counsel,80000015,Dinah Lance
-Corporate Services,Slade Wilson,AO 21,80000023,669-2580,Paralegal,80000022,Alec Holland
 Infrastructure & Ops,Lex Luthor,Band 5,80000024,476-7976,Director Systems,73855860,Marcus Usman
-Infrastructure & Ops,Lois Lane,Band 5,80000025,476-7976,Director Networks,73855860,Marcus Usman
 Cybersecurity,Jimmy Olsen,Band 5,80000026,614-0492,CISO,73855860,Marcus Usman
-Infrastructure & Ops,Perry White,IS 27,80000027,476-7976,Cloud Architect,80000024,Lex Luthor
-Infrastructure & Ops,Cat Grant,IS 24,80000028,476-7976,Cloud Engineer,80000027,Perry White
-Infrastructure & Ops,Ron Troupe,IS 24,80000029,476-7976,Systems Engineer,80000024,Lex Luthor
-Infrastructure & Ops,Steve Lombard,IS 27,80000030,476-7976,Network Architect,80000025,Lois Lane
-Infrastructure & Ops,Lucy Lane,IS 24,80000031,476-7976,Network Admin,80000030,Steve Lombard
-Cybersecurity,Sam Lane,IS 27,80000032,614-0492,Security Architect,80000026,Jimmy Olsen
-Cybersecurity,Maggie Sawyer,IS 24,80000033,614-0492,Security Analyst,80000032,Sam Lane
-Cybersecurity,Dan Turpin,IS 21,80000034,614-0492,SOC Analyst,80000032,Sam Lane
 Data & Analytics,Harvey Dent,Band 5,80000035,200-8505,Director Data Science,22633036,Rohan Kowalski
-Data & Analytics,Selina Kyle,Band 5,80000036,200-8505,Director Data Eng,22633036,Rohan Kowalski
-Data & Analytics,James Gordon,IS 24,80000037,200-8505,BI Developer,35529320,Navdeep Ivanov
-Data & Analytics,Renee Montoya,IS 21,80000038,200-8505,Data Analyst,35529320,Navdeep Ivanov
-Data & Analytics,Crispus Allen,IS 21,80000039,200-8505,Reporting Specialist,35529320,Navdeep Ivanov
-Data & Analytics,Barbara Gordon,IS 27,80000040,200-8505,Lead Data Scientist,80000035,Harvey Dent
-Data & Analytics,Tim Drake,IS 24,80000041,200-8505,Machine Learning Eng,80000040,Barbara Gordon
-Data & Analytics,Jason Todd,IS 24,80000042,200-8505,Data Scientist,80000040,Barbara Gordon
-Data & Analytics,Dick Grayson,IS 27,80000043,200-8505,Lead Data Engineer,80000036,Selina Kyle
-Data & Analytics,Damian Wayne,IS 24,80000044,200-8505,Data Engineer,80000043,Dick Grayson
-Data & Analytics,Stephanie Brown,IS 21,80000045,200-8505,Database Admin,80000036,Selina Kyle
-Data & Analytics,Cassandra Cain,IS 21,80000046,200-8505,ETL Developer,80000043,Dick Grayson
-People & Culture,Lucius Fox,Band 5,80000047,200-8505,Director HR,22169593,Mei McIntyre
-People & Culture,Rachel Dawes,Band 5,80000048,200-8505,Director Talent,22169593,Mei McIntyre
-People & Culture,Carmine Falcone,Band 3,80000049,200-8505,HR Manager,80000047,Lucius Fox
-People & Culture,Sal Maroni,AO 24,80000050,200-8505,HR Generalist,80000049,Carmine Falcone
-People & Culture,Sofia Falcone,AO 21,80000051,200-8505,Benefits Coordinator,80000049,Carmine Falcone
-People & Culture,Alberto Falcone,AO 21,80000052,200-8505,Payroll Specialist,80000047,Lucius Fox
-People & Culture,Oswald Cobblepot,Band 3,80000053,200-8505,Talent Acquisition Mgr,80000048,Rachel Dawes
-People & Culture,Edward Nygma,AO 24,80000054,200-8505,Senior Recruiter,80000053,Oswald Cobblepot
-People & Culture,Pamela Isley,AO 21,80000055,200-8505,Technical Recruiter,80000053,Oswald Cobblepot
-People & Culture,Victor Fries,AO 18,80000056,200-8505,Onboarding Specialist,80000048,Rachel Dawes
-People & Culture,Jervis Tetch,AO 24,80000057,200-8505,L&D Specialist,80000048,Rachel Dawes
-People & Culture,Waylon Jones,AO 21,80000058,200-8505,Training Coordinator,80000057,Jervis Tetch`;
+People & Culture,Lucius Fox,Band 5,80000047,200-8505,Director HR,22169593,Mei McIntyre`;
 
-        // Utility to map CSV rows to the structure needed by D3 Org Chart
+        // Utility algorithm to assign organizational ranking weight for sorting
+        function getClassificationWeight(classification) {
+            if (!classification) return 0;
+            const cls = classification.toUpperCase();
+            
+            // ADMs represent the top tier
+            if (cls.includes('ADM')) return 1000;
+            
+            // Bands represent the management tier (Band 5 = 950, Band 1 = 910, etc.)
+            if (cls.includes('BAND')) {
+                const match = cls.match(/\d+/);
+                const num = match ? parseInt(match[0]) : 0;
+                return 900 + (num * 10);
+            }
+            
+            // Operational roles (IS 27, AO 24, FO 18) sorted by their parsed number
+            const match = cls.match(/\d+/);
+            const num = match ? parseInt(match[0]) : 0;
+            return num;
+        }
+
         function mapDataForChart(rawData) {
-            // Collect all valid IDs to handle disconnected orphans
             const validIds = new Set(rawData.map(row => row['Position ID']).filter(id => id));
 
             let nodes = rawData.map(row => {
                 let parentId = (row['Supervisor Position ID'] || '').trim();
-                // If the parent ID points to a node that doesn't exist in our dataset, 
-                // link them to the root or make them empty to prevent D3 from crashing
                 if (parentId && !validIds.has(parentId)) {
                     parentId = ''; 
                 }
@@ -243,10 +208,9 @@ People & Culture,Waylon Jones,AO 21,80000058,200-8505,Training Coordinator,80000
                     department: row['Department'],
                     supervisorName: row['Supervisor Name']
                 };
-            }).filter(node => node.id); // Remove entirely empty rows
+            }).filter(node => node.id);
 
-            // FIX: D3 Org Chart crashes if there are multiple "root" nodes (people without managers).
-            // We group any disconnected branches under a single "Organization" root node.
+            // Group disconnected roots to avoid crashing
             const rootNodes = nodes.filter(n => !n.parentId);
             if (rootNodes.length > 1) {
                 nodes.push({
@@ -255,52 +219,92 @@ People & Culture,Waylon Jones,AO 21,80000058,200-8505,Training Coordinator,80000
                     name: 'Organization Board',
                     title: 'Top Level',
                     branch: 'Executive',
-                    classification: '',
+                    classification: 'ADM', // Set dummy root to highest class
                     department: '',
                     supervisorName: ''
                 });
                 rootNodes.forEach(n => n.parentId = 'SYSTEM_ROOT');
             }
 
+            // SORTING LOGIC: Organizes siblings so ADMs -> Bands -> Operational (by number)
+            nodes.sort((a, b) => {
+                const weightA = getClassificationWeight(a.classification);
+                const weightB = getClassificationWeight(b.classification);
+                
+                // If weights are equal, sort alphabetically by name
+                if (weightA === weightB) {
+                    return (a.name || '').localeCompare(b.name || '');
+                }
+                
+                // Sort Descending (highest weights first)
+                return weightB - weightA;
+            });
+
             return nodes;
         }
 
-        // Color palette for different branches to make it visually pleasing
         const branchColors = {
-            'Executive': '#0f172a', // Slate 900
-            'Digital Services': '#2563eb', // Blue 600
-            'Corporate Services': '#059669', // Emerald 600
-            'Infrastructure & Ops': '#d97706', // Amber 600
-            'Data & Analytics': '#7c3aed', // Violet 600
-            'People & Culture': '#db2777', // Pink 600
-            'Cybersecurity': '#dc2626' // Red 600
+            'Executive': '#0f172a', 
+            'Digital Services': '#2563eb', 
+            'Corporate Services': '#059669', 
+            'Infrastructure & Ops': '#d97706', 
+            'Data & Analytics': '#7c3aed', 
+            'People & Culture': '#db2777', 
+            'Cybersecurity': '#dc2626' 
         };
 
         function getBranchColor(branchName) {
-            return branchColors[branchName] || '#475569'; // Default Slate 600
+            return branchColors[branchName] || '#475569';
         }
 
-        // Added Layout Management
         let isVertical = true;
         function toggleLayout() {
             isVertical = !isVertical;
             chart.layout(isVertical ? 'top' : 'left').render().fit();
         }
 
-        // Initialize the Chart
-        function renderChart(data) {
-            globalData = data;
+        // Logic to manually open nodes based on Classification (Semantic Depth)
+        function expandSemantic(level) {
+            chart.collapseAll();
             
-            // Update the live employee count
-            document.getElementById('employee-count').textContent = `${data.length} Employees loaded`;
-            
-            if (chart) {
-                // If chart already exists, just update data
-                chart.data(data).render().fit();
+            // Expand the root node so the chart isn't invisible
+            const rootNode = globalData.find(d => !d.parentId);
+            if (rootNode) chart.setExpanded(rootNode.id);
+
+            if (level === 'All') {
+                chart.expandAll().render().fit();
                 return;
             }
 
-            // Create new chart
+            globalData.forEach(node => {
+                const cls = (node.classification || '').toUpperCase();
+                
+                if (level === 'ADM') {
+                    // Level 1: Expand any node that is an ADM
+                    if (cls.includes('ADM')) {
+                        chart.setExpanded(node.id);
+                    }
+                } else if (level === 'Band') {
+                    // Level 2: Expand any node that is an ADM or a Band
+                    if (cls.includes('ADM') || cls.includes('BAND')) {
+                        chart.setExpanded(node.id);
+                    }
+                }
+            });
+            
+            chart.render().fit();
+        }
+
+        function renderChart(data) {
+            globalData = data;
+            document.getElementById('employee-count').textContent = `${data.length} Employees loaded`;
+            
+            if (chart) {
+                chart.data(data).render();
+                expandSemantic('ADM'); // Default to expanding Level 1
+                return;
+            }
+
             chart = new d3.OrgChart()
                 .container('#chart-container')
                 .data(data)
@@ -309,46 +313,37 @@ People & Culture,Waylon Jones,AO 21,80000058,200-8505,Training Coordinator,80000
                 .childrenMargin(d => 50)
                 .compactMarginBetween(d => 30)
                 .compactMarginPair(d => 60)
-                // Added: Custom link styling to highlight connections within a searched team
                 .linkUpdate(function (d, i, arr) {
                     d3.select(this)
                         .attr("stroke", d => {
-                            // Highlight the connection if both the child and parent are in the highlighted team
                             if (d.data._highlightedTeam && d.parent && d.parent.data._highlightedTeam) {
                                 return getBranchColor(d.data.branch);
                             }
-                            return "#e2e8f0"; // Default slate-200 line color
+                            return "#cbd5e1"; 
                         })
                         .attr("stroke-width", d => {
-                            if (d.data._highlightedTeam && d.parent && d.parent.data._highlightedTeam) {
-                                return 4; // Thicker, bolder line for the team highlight
-                            }
-                            return 1.5; // Default line thickness
+                            if (d.data._highlightedTeam && d.parent && d.parent.data._highlightedTeam) return 4;
+                            return 1.5;
                         });
                 })
-                // Design the actual Card for each person
                 .nodeContent(function(d, i, arr, state) {
                     const color = getBranchColor(d.data.branch);
-                    const initials = d.data.name.split(' ').map(n => n[0]).join('').substring(0,2);
+                    const initials = d.data.name ? d.data.name.split(' ').map(n => n[0]).join('').substring(0,2) : '--';
                     
-                    // Added: Check for custom team highlight and apply glowing effect
                     const isHighlighted = d.data._highlightedTeam;
                     const cardStyle = isHighlighted 
                         ? `border: 2px solid ${color}; box-shadow: 0 0 20px ${color}60; transform: scale(1.02); background-color: #f8fafc;` 
                         : `border: 1px solid #e2e8f0; background-color: white;`;
                     
                     return `
-                    <div class="node-card" style="font-family: ui-sans-serif, system-ui, sans-serif; ${cardStyle} border-radius: 12px; width: ${d.width}px; height: ${d.height}px; display: flex; flex-direction: column; overflow: hidden; cursor: pointer; position: relative; transition: all 0.2s ease;">
-                        <!-- Branch Color Bar -->
+                    <div class="node-card" style="font-family: ui-sans-serif, system-ui, sans-serif; ${cardStyle} border-radius: 12px; width: ${d.width}px; height: ${d.height}px; display: flex; flex-direction: column; overflow: hidden; cursor: pointer; position: relative;">
                         <div style="height: 6px; width: 100%; background-color: ${color};"></div>
                         
                         <div style="padding: 16px; display: flex; align-items: center; gap: 12px; flex: 1;">
-                            <!-- Avatar -->
                             <div style="width: 48px; height: 48px; border-radius: 9999px; background-color: #f1f5f9; display: flex; align-items: center; justify-content: center; font-weight: bold; color: ${color}; font-size: 16px; border: 1px solid #e2e8f0; flex-shrink: 0;">
                                 ${initials}
                             </div>
                             
-                            <!-- Text Data -->
                             <div style="overflow: hidden;">
                                 <div style="font-weight: 700; font-size: 15px; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                     ${d.data.name}
@@ -362,7 +357,6 @@ People & Culture,Waylon Jones,AO 21,80000058,200-8505,Training Coordinator,80000
                             </div>
                         </div>
 
-                        <!-- Expand/Collapse Indicator -->
                         ${d.data._directSubordinates > 0 ? `
                         <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 24px; background-color: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #64748b; font-weight: 500;">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
@@ -379,26 +373,22 @@ People & Culture,Waylon Jones,AO 21,80000058,200-8505,Training Coordinator,80000
                     `;
                 })
                 .onNodeClick(d => {
-                    // Clicking a node shows profile and centers it
                     showProfile(d.data);
                     chart.setCentered(d.data.id).render();
                 })
-                .render()
-                .expandAll()
-                .fit();
+                .render();
+
+            // Default behavior: Open ADMs immediately after drawing
+            expandSemantic('ADM');
         }
 
-        // Initial Load with Fallback Data
         Papa.parse(defaultCSV, {
-            header: true,
-            skipEmptyLines: true,
+            header: true, skipEmptyLines: true,
             complete: function(results) {
-                const mapped = mapDataForChart(results.data);
-                renderChart(mapped);
+                renderChart(mapDataForChart(results.data));
             }
         });
 
-        // Handle File Uploads
         document.getElementById('csvFileInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -408,8 +398,7 @@ People & Culture,Waylon Jones,AO 21,80000058,200-8505,Training Coordinator,80000
             statusEl.classList.remove('hidden');
 
             Papa.parse(file, {
-                header: true,
-                skipEmptyLines: true,
+                header: true, skipEmptyLines: true,
                 complete: function(results) {
                     try {
                         const mapped = mapDataForChart(results.data);
@@ -419,19 +408,14 @@ People & Culture,Waylon Jones,AO 21,80000058,200-8505,Training Coordinator,80000
                         statusEl.classList.add('text-green-600');
                         setTimeout(() => statusEl.classList.add('hidden'), 3000);
                     } catch (err) {
-                        console.error(err);
                         statusEl.textContent = 'Error: ' + err.message;
-                        statusEl.classList.remove('text-green-600');
                         statusEl.classList.add('text-red-600');
                     }
                 }
             });
-            
-            // Reset input so the same file can be clicked again if needed
             e.target.value = '';
         });
 
-        // Search Functionality
         const searchInput = document.getElementById('searchInput');
         const searchResults = document.getElementById('searchResults');
 
@@ -445,77 +429,51 @@ People & Culture,Waylon Jones,AO 21,80000058,200-8505,Training Coordinator,80000
                 return;
             }
 
-            // 1. Find matching Teams (Branches) and Departments
             const branches = [...new Set(globalData.map(d => d.branch))].filter(b => b && b.toLowerCase().includes(query));
             const departments = [...new Set(globalData.map(d => d.department))].filter(dp => dp && dp.toLowerCase().includes(query));
-
-            // 2. Find matching People
             const people = globalData.filter(d => 
                 (d.name && d.name.toLowerCase().includes(query)) || 
                 (d.title && d.title.toLowerCase().includes(query))
-            ).slice(0, 8); // Limit to 8 results
+            ).slice(0, 8);
 
             searchResults.innerHTML = '';
             let hasResults = false;
 
-            // Render Team/Branch Results
             branches.forEach(branch => {
                 hasResults = true;
                 const div = document.createElement('div');
                 div.className = 'p-3 border-b border-slate-100 hover:bg-blue-50 cursor-pointer flex items-center gap-3';
-                div.innerHTML = `
-                    <div class="p-2 bg-blue-100 text-blue-600 rounded-lg shrink-0"><i data-lucide="users" class="w-4 h-4"></i></div>
-                    <div class="flex flex-col">
-                        <span class="text-sm font-bold text-slate-800">${branch}</span>
-                        <span class="text-xs text-slate-500">Entire Team / Branch</span>
-                    </div>
-                `;
+                div.innerHTML = `<div class="p-2 bg-blue-100 text-blue-600 rounded-lg shrink-0"><i data-lucide="users" class="w-4 h-4"></i></div>
+                    <div class="flex flex-col"><span class="text-sm font-bold text-slate-800">${branch}</span><span class="text-xs text-slate-500">Entire Team / Branch</span></div>`;
                 div.onclick = () => highlightTeam('branch', branch);
                 searchResults.appendChild(div);
             });
 
-            // Render Department Results
             departments.forEach(dept => {
                 hasResults = true;
                 const div = document.createElement('div');
                 div.className = 'p-3 border-b border-slate-100 hover:bg-emerald-50 cursor-pointer flex items-center gap-3';
-                div.innerHTML = `
-                    <div class="p-2 bg-emerald-100 text-emerald-600 rounded-lg shrink-0"><i data-lucide="building" class="w-4 h-4"></i></div>
-                    <div class="flex flex-col">
-                        <span class="text-sm font-bold text-slate-800">Dept: ${dept}</span>
-                        <span class="text-xs text-slate-500">Entire Department</span>
-                    </div>
-                `;
+                div.innerHTML = `<div class="p-2 bg-emerald-100 text-emerald-600 rounded-lg shrink-0"><i data-lucide="building" class="w-4 h-4"></i></div>
+                    <div class="flex flex-col"><span class="text-sm font-bold text-slate-800">Dept: ${dept}</span><span class="text-xs text-slate-500">Entire Department</span></div>`;
                 div.onclick = () => highlightTeam('department', dept);
                 searchResults.appendChild(div);
             });
 
-            // Render People Results
             if (people.length > 0) {
                 people.forEach(r => {
                     hasResults = true;
                     const div = document.createElement('div');
                     div.className = 'p-3 border-b border-slate-100 hover:bg-slate-50 cursor-pointer flex items-center gap-3';
-                    div.innerHTML = `
-                        <div class="p-2 bg-slate-100 text-slate-600 rounded-lg shrink-0"><i data-lucide="user" class="w-4 h-4"></i></div>
-                        <div class="flex flex-col">
-                            <span class="text-sm font-bold text-slate-800">${r.name}</span>
-                            <span class="text-xs text-slate-500">${r.title} • ${r.branch}</span>
-                        </div>
-                    `;
+                    div.innerHTML = `<div class="p-2 bg-slate-100 text-slate-600 rounded-lg shrink-0"><i data-lucide="user" class="w-4 h-4"></i></div>
+                        <div class="flex flex-col"><span class="text-sm font-bold text-slate-800">${r.name}</span><span class="text-xs text-slate-500">${r.title} • ${r.branch}</span></div>`;
                     div.onclick = () => {
                         searchResults.classList.add('hidden');
                         searchInput.value = r.name;
-                        
-                        // Clear custom team highlights
                         globalData.forEach(d => d._highlightedTeam = false);
-                        
-                        // Expand the tree to the node, highlight it, and center
                         chart.clearHighlighting();
                         chart.setUpToTheRootHighlighted(r.id);
                         chart.setCentered(r.id);
                         chart.render();
-                        
                         showProfile(r);
                     };
                     searchResults.appendChild(div);
@@ -524,38 +482,27 @@ People & Culture,Waylon Jones,AO 21,80000058,200-8505,Training Coordinator,80000
 
             if (hasResults) {
                 searchResults.classList.remove('hidden');
-                lucide.createIcons(); // Initialize the new icons
+                lucide.createIcons();
             } else {
                 searchResults.innerHTML = '<div class="p-4 text-sm text-slate-500 text-center">No results found</div>';
                 searchResults.classList.remove('hidden');
             }
         });
 
-        // Function to highlight an entire team/branch/department
         function highlightTeam(type, value) {
             searchResults.classList.add('hidden');
             searchInput.value = value;
-            
-            // Clear default d3 path highlighting
             chart.clearHighlighting();
 
-            // 1. Identify all members of the selected team
             const teamNodes = globalData.filter(d => d[type] === value);
             const teamIds = new Set(teamNodes.map(d => d.id));
-            
-            // 2. Find the top-most leader(s) of this team (their supervisor is outside this team)
             const teamLeaders = teamNodes.filter(d => !teamIds.has(d.parentId));
             const mainLeader = teamLeaders.length > 0 ? teamLeaders[0] : null;
 
-            // Set custom highlight flag on team members
-            globalData.forEach(d => {
-                d._highlightedTeam = (d[type] === value);
-            });
+            globalData.forEach(d => { d._highlightedTeam = (d[type] === value); });
 
-            // Isolate the team by collapsing everything first
             chart.collapseAll();
 
-            // Expand down to the team's main leader so the path is visible
             if (mainLeader) {
                 let currentId = mainLeader.parentId;
                 while (currentId) {
@@ -565,47 +512,33 @@ People & Culture,Waylon Jones,AO 21,80000058,200-8505,Training Coordinator,80000
                 }
             }
 
-            // Expand all members within the selected team
-            teamNodes.forEach(node => {
-                chart.setExpanded(node.id);
-            });
+            teamNodes.forEach(node => { chart.setExpanded(node.id); });
 
             chart.render();
-            
-            // Allow the render transitions to finish, then fit the newly isolated team to the screen
-            setTimeout(() => {
-                chart.fit();
-            }, 300);
-            
-            // Close profile panel if it was open
+            setTimeout(() => { chart.fit(); }, 300);
             closeProfile();
         }
 
-        // Close search results when clicking outside
         document.addEventListener('click', function(e) {
             if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
                 searchResults.classList.add('hidden');
             }
         });
 
-        // Profile Panel UI Management
         const profilePanel = document.getElementById('profilePanel');
         
         function showProfile(data) {
-            const initials = data.name.split(' ').map(n => n[0]).join('').substring(0,2);
-            
+            const initials = data.name ? data.name.split(' ').map(n => n[0]).join('').substring(0,2) : '--';
             document.getElementById('profileAvatar').textContent = initials;
             document.getElementById('profileAvatar').style.color = getBranchColor(data.branch);
-            document.getElementById('profileName').textContent = data.name;
-            document.getElementById('profileTitle').textContent = data.title;
-            document.getElementById('profileBranch').textContent = data.branch;
-            
+            document.getElementById('profileName').textContent = data.name || 'Unknown';
+            document.getElementById('profileTitle').textContent = data.title || 'Unknown Position';
+            document.getElementById('profileBranch').textContent = data.branch || 'No Branch';
             document.getElementById('profilePosId').textContent = data.id || 'N/A';
             document.getElementById('profileDept').textContent = data.department || 'N/A';
             document.getElementById('profileClass').textContent = data.classification || 'N/A';
             document.getElementById('profileSupervisor').textContent = data.supervisorName || 'Root / None';
 
-            // Slide in animation
             profilePanel.classList.remove('translate-x-[120%]', 'opacity-0');
             profilePanel.classList.add('translate-x-0', 'opacity-100');
         }
