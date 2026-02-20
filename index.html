@@ -20,21 +20,25 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
+        /* Custom scrollbar for the search results */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
-        .node-card { transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s; }
+        /* Node Animations */
+        .node-card { transition: box-shadow 0.2s, border-color 0.2s; }
         .node-card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border-color: #94a3b8; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 h-screen w-screen overflow-hidden font-sans selection:bg-blue-200">
 
+    <!-- The Infinite Canvas Container -->
     <div id="chart-container" class="w-full h-full cursor-grab active:cursor-grabbing"></div>
 
-    <!-- Top Left: Controls & Search -->
+    <!-- Floating UI: Top Left (Controls & Search) -->
     <div class="absolute top-4 left-4 w-80 flex flex-col gap-3 z-10">
+        <!-- App Header & File Upload -->
         <div class="bg-white/90 backdrop-blur shadow-lg border border-slate-200 rounded-xl p-5">
             <h1 class="text-lg font-bold text-slate-900 flex items-center gap-2 mb-1">
                 <i data-lucide="network" class="w-5 h-5 text-blue-600"></i>
@@ -51,26 +55,37 @@
             <div id="file-status" class="text-xs text-green-600 mt-2 hidden font-medium text-center">Data loaded successfully!</div>
         </div>
 
+        <!-- Search Bar -->
         <div class="bg-white/90 backdrop-blur shadow-lg border border-slate-200 rounded-xl p-2 relative">
             <div class="relative">
                 <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                <input type="text" id="searchInput" placeholder="Search people or teams..." 
+                <input type="text" id="searchInput" placeholder="Search people or titles..." 
                     class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
             </div>
+            <!-- Search Results Dropdown -->
             <div id="searchResults" class="absolute top-full left-0 w-full mt-2 bg-white border border-slate-200 shadow-xl rounded-xl overflow-hidden max-h-60 overflow-y-auto hidden">
                 <!-- Results injected here -->
             </div>
         </div>
-        
-        <!-- Semantic Depth Toggles -->
-        <div class="flex gap-2">
-            <button onclick="expandSemantic('ADM')" class="flex-1 bg-white shadow border border-slate-200 rounded-lg py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition" title="Show Executives">Level 1 (ADMs)</button>
-            <button onclick="expandSemantic('Band')" class="flex-1 bg-white shadow border border-slate-200 rounded-lg py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition" title="Show Management">Level 2 (Bands)</button>
-            <button onclick="expandSemantic('All')" class="flex-1 bg-white shadow border border-slate-200 rounded-lg py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition" title="Show Everyone">All Staff</button>
+
+        <!-- Explore Structure Filters -->
+        <div class="bg-white/90 backdrop-blur shadow-lg border border-slate-200 rounded-xl p-4 relative">
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Explore Structure</h3>
+            <div class="flex flex-col gap-2">
+                <select id="divisionSelect" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-slate-700">
+                    <option value="">-- Select Division --</option>
+                </select>
+                <select id="branchSelect" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-slate-700 hidden">
+                    <option value="">-- Select Branch --</option>
+                </select>
+                <button onclick="resetFilters()" class="w-full mt-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 rounded-lg text-xs transition-colors">
+                    Reset View
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- Right Side: Employee Profile Panel -->
+    <!-- Floating UI: Right Side (Employee Profile Panel) -->
     <div id="profilePanel" class="absolute top-4 right-4 w-80 bg-white shadow-2xl border border-slate-200 rounded-xl flex flex-col z-10 transition-transform duration-300 translate-x-[120%] opacity-0 h-[calc(100vh-2rem)]">
         <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 rounded-t-xl">
             <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Employee Profile</h2>
@@ -80,10 +95,13 @@
         </div>
         
         <div class="p-6 flex flex-col items-center border-b border-slate-100">
-            <div id="profileAvatar" class="w-20 h-20 rounded-full bg-blue-100 border-4 border-white shadow-sm flex items-center justify-center text-2xl font-bold text-blue-600 mb-3"></div>
-            <h3 id="profileName" class="text-xl font-bold text-slate-900 text-center"></h3>
-            <p id="profileTitle" class="text-sm text-blue-600 font-medium text-center mt-1"></p>
-            <span id="profileBranch" class="mt-3 px-3 py-1 bg-slate-100 text-slate-600 text-xs font-semibold rounded-full border border-slate-200"></span>
+            <!-- Avatar Placeholder -->
+            <div id="profileAvatar" class="w-20 h-20 rounded-full bg-blue-100 border-4 border-white shadow-sm flex items-center justify-center text-2xl font-bold text-blue-600 mb-3">
+                JS
+            </div>
+            <h3 id="profileName" class="text-xl font-bold text-slate-900 text-center">Julien Santos</h3>
+            <p id="profileTitle" class="text-sm text-blue-600 font-medium text-center text-center mt-1">Associate Deputy Minister</p>
+            <span id="profileBranch" class="mt-3 px-3 py-1 bg-slate-100 text-slate-600 text-xs font-semibold rounded-full border border-slate-200">Executive</span>
         </div>
 
         <div class="p-6 flex-1 overflow-y-auto">
@@ -91,25 +109,29 @@
             <div class="space-y-4">
                 <div>
                     <p class="text-xs text-slate-500 mb-1">Position ID</p>
-                    <p id="profilePosId" class="text-sm font-medium text-slate-800"></p>
+                    <p id="profilePosId" class="text-sm font-medium text-slate-800">70717355</p>
                 </div>
                 <div>
-                    <p class="text-xs text-slate-500 mb-1">Department</p>
-                    <p id="profileDept" class="text-sm font-medium text-slate-800"></p>
+                    <p class="text-xs text-slate-500 mb-1">Division</p>
+                    <p id="profileDivision" class="text-sm font-medium text-slate-800">Ministry Executive</p>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-500 mb-1">Branch</p>
+                    <p id="profileBranchDetail" class="text-sm font-medium text-slate-800">Executive Office</p>
                 </div>
                 <div>
                     <p class="text-xs text-slate-500 mb-1">Classification</p>
-                    <p id="profileClass" class="text-sm font-medium text-slate-800"></p>
+                    <p id="profileClass" class="text-sm font-medium text-slate-800">ADM</p>
                 </div>
                 <div>
                     <p class="text-xs text-slate-500 mb-1">Reports To</p>
-                    <p id="profileSupervisor" class="text-sm font-medium text-slate-800"></p>
+                    <p id="profileSupervisor" class="text-sm font-medium text-slate-800">-</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Bottom Right: Zoom Controls -->
+    <!-- Floating UI: Bottom Right (Zoom Controls) -->
     <div class="absolute bottom-6 right-6 bg-white shadow-lg border border-slate-200 rounded-lg flex flex-col z-10 overflow-hidden">
         <button onclick="chart.zoomIn()" class="p-3 text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-colors border-b border-slate-100" title="Zoom In">
             <i data-lucide="zoom-in" class="w-5 h-5"></i>
@@ -120,7 +142,7 @@
         <button onclick="chart.fit()" class="p-3 text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-colors border-b border-slate-100" title="Fit to Screen">
             <i data-lucide="maximize" class="w-5 h-5"></i>
         </button>
-        <button onclick="expandSemantic('All')" class="p-3 text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-colors border-b border-slate-100" title="Expand All (Warning: Large)">
+        <button onclick="chart.expandAll().fit()" class="p-3 text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-colors border-b border-slate-100" title="Expand All">
             <i data-lucide="unfold-vertical" class="w-5 h-5"></i>
         </button>
         <button onclick="chart.collapseAll().fit()" class="p-3 text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-colors border-b border-slate-100" title="Collapse All">
@@ -135,55 +157,119 @@
     </div>
 
     <script>
+        // Initialize Lucide icons
         lucide.createIcons();
 
         let chart;
         let globalData = [];
-        
-        // Expanded Default Data
-        const defaultCSV = `Branch,Name,Classification,Position ID,Department,Job Title,Supervisor Position ID,Supervisor Name
-Executive,Julien Santos,ADM,70717355,000-0000,Associate Deputy Minister,,
-Executive,Diana Prince,Band 3,80000001,000-0000,Chief of Staff,70717355,Julien Santos
-Digital Services,Rohan Rahman,ADM,72498494,000-0000,Assistant Deputy Minister,70717355,Julien Santos
-Corporate Services,Liam McIntyre,ADM,35488219,000-0000,Assistant Deputy Minister,70717355,Julien Santos
-Infrastructure & Ops,Marcus Usman,ADM,73855860,000-0000,Assistant Deputy Minister,70717355,Julien Santos
-Data & Analytics,Rohan Kowalski,ADM,22633036,000-0000,Assistant Deputy Minister,70717355,Julien Santos
-People & Culture,Mei McIntyre,ADM,22169593,000-0000,Assistant Deputy Minister,70717355,Julien Santos
-Corporate Services,Miguel Petrov,Band 5,89918134,669-2580,Executive Director,35488219,Liam McIntyre
-Digital Services,Fatima Rahman,Band 5,12013364,064-0975,Executive Director,72498494,Rohan Rahman
-Data & Analytics,Navdeep Ivanov,Band 5,35529320,200-8505,Executive Director,22633036,Rohan Kowalski
-Digital Services,Amrit Lopez,IS 21,73416496,749-2145,Senior Analyst,12013364,Fatima Rahman
-People & Culture,Navdeep Xu,FO 18,37113369,200-8505,Policy Analyst,22169593,Mei McIntyre
-Infrastructure & Ops,Amrit Kaur,Band 3,97256857,476-7976,Senior Analyst,73855860,Marcus Usman
-People & Culture,Fatima Lopez,IS 24,66419615,235-8403,Service Designer,22169593,Mei McIntyre
-Cybersecurity,Ben Zhao,AO 15,65723278,614-0492,Senior Analyst,73855860,Marcus Usman
-Infrastructure & Ops,Julien Kowalski,Band 2,36369108,200-8505,System Admin,73855860,Marcus Usman
-Digital Services,Clark Kent,Band 5,80000003,064-0975,Director UX,72498494,Rohan Rahman
-Digital Services,Barry Allen,Band 5,80000004,064-0975,Director Engineering,72498494,Rohan Rahman
-Digital Services,Wally West,IS 27,80000010,749-2145,Lead Developer,80000004,Barry Allen
-Digital Services,Kyle Rayner,IS 24,80000011,749-2145,Full Stack Dev,80000010,Wally West
-Corporate Services,Oliver Queen,Band 5,80000014,669-2580,Director Finance,35488219,Liam McIntyre
-Infrastructure & Ops,Lex Luthor,Band 5,80000024,476-7976,Director Systems,73855860,Marcus Usman
-Cybersecurity,Jimmy Olsen,Band 5,80000026,614-0492,CISO,73855860,Marcus Usman
-Data & Analytics,Harvey Dent,Band 5,80000035,200-8505,Director Data Science,22633036,Rohan Kowalski
-People & Culture,Lucius Fox,Band 5,80000047,200-8505,Director HR,22169593,Mei McIntyre`;
+
+        // Fallback Data based on the new Strict Ministry Org format
+        const defaultCSV = `Division,Branch,Name,Classification,Position ID,Job Title,Supervisor Position ID,Supervisor Name
+Ministry Executive,Deputy Minister's Office,Julien Santos,DM,100000,Deputy Minister,,
+Ministry Executive,Deputy Minister's Office,Bruce Wayne,Band 2,100001,Executive Assistant,100000,Julien Santos
+Ministry Executive,Deputy Minister's Office,Alfred Pennyworth,AO 24,100002,Senior Advisor,100000,Julien Santos
+NRRIS,ADM Office,Rohan Rahman,ADM,200000,Assistant Deputy Minister,100000,Julien Santos
+NRRIS,ADM Office,Lois Lane,AO 18,200001,Divisional Coordinator,200000,Rohan Rahman
+NRRIS,Digital Services,Clark Kent,Band 5,210000,Executive Director,200000,Rohan Rahman
+NRRIS,Digital Services,Barry Allen,Band 4,211000,Director Frontend Development,210000,Clark Kent
+NRRIS,Digital Services,Wally West,IS 27,211001,Lead Developer,211000,Barry Allen
+NRRIS,Digital Services,Kyle Rayner,IS 24,211002,Full Stack Developer,211000,Barry Allen
+NRRIS,Digital Services,Jessica Cruz,IS 21,211003,Frontend Developer,211000,Barry Allen
+NRRIS,Digital Services,Simon Baz,IS 21,211004,Frontend Developer,211000,Barry Allen
+NRRIS,Digital Services,Guy Gardner,IS 21,211005,Junior Developer,211000,Barry Allen
+NRRIS,Digital Services,Victor Stone,Band 4,212000,Director Backend Systems,210000,Clark Kent
+NRRIS,Digital Services,Ron Troupe,IS 27,212001,Cloud Architect,212000,Victor Stone
+NRRIS,Digital Services,Steve Lombard,IS 24,212002,Systems Engineer,212000,Victor Stone
+NRRIS,Digital Services,Cat Grant,IS 24,212003,Database Administrator,212000,Victor Stone
+NRRIS,Digital Services,Lucy Lane,IS 21,212004,Backend Developer,212000,Victor Stone
+NRRIS,Digital Services,Jimmy Olsen,IS 21,212005,Backend Developer,212000,Victor Stone
+NRRIS,Digital Services,Arthur Curry,Band 3,213000,Manager UX Design,210000,Clark Kent
+NRRIS,Digital Services,Hal Jordan,IS 24,213001,Lead Designer,213000,Arthur Curry
+NRRIS,Digital Services,Mera Curry,IS 21,213002,UX Researcher,213000,Arthur Curry
+NRRIS,Digital Services,Garth Tempest,IS 21,213003,UI Designer,213000,Arthur Curry
+NRRIS,Client Services,Diana Prince,Band 5,220000,Executive Director,200000,Rohan Rahman
+NRRIS,Client Services,Steve Trevor,Band 4,221000,Director Client Relations,220000,Diana Prince
+NRRIS,Client Services,Etta Candy,AO 24,221001,Client Service Liaison,221000,Steve Trevor
+NRRIS,Client Services,Paul Omelchenko,IS 24,221002,Client Service Liaison,221000,Steve Trevor
+NRRIS,Client Services,Barbara Minerva,AO 21,221003,Service Coordinator,221000,Steve Trevor
+NRRIS,Client Services,Donna Troy,Band 4,222000,Director Helpdesk Ops,220000,Diana Prince
+NRRIS,Client Services,Cassie Sandsmark,IS 21,222001,IT Support Specialist,222000,Donna Troy
+NRRIS,Client Services,Jason Blood,IS 21,222002,IT Support Specialist,222000,Donna Troy
+NRRIS,Client Services,Zatanna Zatara,IS 21,222003,IT Support Specialist,222000,Donna Troy
+NRRIS,Data & Analytics,Oliver Queen,Band 5,230000,Executive Director,200000,Rohan Rahman
+NRRIS,Data & Analytics,Felicity Smoak,Band 4,231000,Director Data Science,230000,Oliver Queen
+NRRIS,Data & Analytics,Curtis Holt,IS 27,231001,Lead Data Scientist,231000,Felicity Smoak
+NRRIS,Data & Analytics,Rene Ramirez,IS 24,231002,Data Scientist,231000,Felicity Smoak
+NRRIS,Data & Analytics,Dinah Drake,IS 24,231003,Data Engineer,231000,Felicity Smoak
+NRRIS,Data & Analytics,Roy Harper,Band 4,232000,Director BI & Reporting,230000,Oliver Queen
+NRRIS,Data & Analytics,Thea Queen,IS 24,232001,BI Developer,232000,Roy Harper
+NRRIS,Data & Analytics,Mia Smoak,IS 21,232002,Data Analyst,232000,Roy Harper
+NRRIS,Data & Analytics,Connor Hawke,IS 21,232003,Data Analyst,232000,Roy Harper
+CSNR,ADM Office,Liam McIntyre,ADM,300000,Assistant Deputy Minister,100000,Julien Santos
+CSNR,ADM Office,Kara Danvers,AO 18,300001,Divisional Coordinator,300000,Liam McIntyre
+CSNR,Financial Services,Miguel Petrov,Band 5,310000,Executive Director,300000,Liam McIntyre
+CSNR,Financial Services,John Constantine,Band 4,311000,Director Accounting,310000,Miguel Petrov
+CSNR,Financial Services,Chas Chandler,FO 24,311001,Senior Accountant,311000,John Constantine
+CSNR,Financial Services,Zed Martin,FO 21,311002,Financial Analyst,311000,John Constantine
+CSNR,Financial Services,Gary Lester,FO 18,311003,Payroll Clerk,311000,John Constantine
+CSNR,Financial Services,Ray Palmer,Band 4,312000,Director Procurement,310000,Miguel Petrov
+CSNR,Financial Services,Carter Hall,AO 24,312001,Senior Procurement Officer,312000,Ray Palmer
+CSNR,Financial Services,Kendra Saunders,AO 21,312002,Procurement Officer,312000,Ray Palmer
+CSNR,People & Culture,Mei Lin,Band 5,320000,Executive Director,300000,Liam McIntyre
+CSNR,People & Culture,Lucius Fox,Band 4,321000,Director Talent Acquisition,320000,Mei Lin
+CSNR,People & Culture,Rachel Dawes,AO 24,321001,Senior Recruiter,321000,Lucius Fox
+CSNR,People & Culture,Harvey Dent,AO 21,321002,Technical Recruiter,321000,Lucius Fox
+CSNR,People & Culture,Carmine Falcone,Band 4,322000,Director Employee Relations,320000,Mei Lin
+CSNR,People & Culture,Sal Maroni,AO 24,322001,HR Business Partner,322000,Carmine Falcone
+CSNR,People & Culture,Sofia Falcone,AO 21,322002,HR Generalist,322000,Carmine Falcone
+CSNR,Legal & Privacy,Dinah Lance,Band 5,330000,Executive Director,300000,Liam McIntyre
+CSNR,Legal & Privacy,Alec Holland,Band 4,331000,Director Privacy Compliance,330000,Dinah Lance
+CSNR,Legal & Privacy,Abby Arcane,AO 24,331001,Senior FOIPPA Analyst,331000,Alec Holland
+CSNR,Legal & Privacy,Matt Cable,AO 21,331002,Privacy Analyst,331000,Alec Holland
+ENV,ADM Office,Sarah Connor,ADM,400000,Assistant Deputy Minister,100000,Julien Santos
+ENV,ADM Office,John Connor,AO 18,400001,Divisional Coordinator,400000,Sarah Connor
+ENV,Climate Action,Kyle Reese,Band 5,410000,Executive Director,400000,Sarah Connor
+ENV,Climate Action,Miles Dyson,Band 4,411000,Director Emissions Tracking,410000,Kyle Reese
+ENV,Climate Action,Tarissa Dyson,IS 24,411001,Environmental Data Analyst,411000,Miles Dyson
+ENV,Climate Action,Danny Dyson,IS 21,411002,Junior Data Analyst,411000,Miles Dyson
+ENV,Conservation,Marcus Wright,Band 5,420000,Executive Director,400000,Sarah Connor
+ENV,Conservation,Blair Williams,Band 4,421000,Director Wildlife Protection,420000,Marcus Wright
+ENV,Conservation,Barnes,AO 24,421001,Senior Conservation Officer,421000,Blair Williams
+ENV,Conservation,Star,AO 21,421002,Conservation Officer,421000,Blair Williams
+FOR,ADM Office,Marcus Usman,ADM,500000,Assistant Deputy Minister,100000,Julien Santos
+FOR,ADM Office,Elena Fisher,AO 18,500001,Divisional Coordinator,500000,Marcus Usman
+FOR,Timber Operations,Nathan Drake,Band 5,510000,Executive Director,500000,Marcus Usman
+FOR,Timber Operations,Victor Sullivan,Band 4,511000,Director Forestry Planning,510000,Nathan Drake
+FOR,Timber Operations,Chloe Frazer,AO 24,511001,Senior Forestry Planner,511000,Victor Sullivan
+FOR,Timber Operations,Samuel Drake,AO 21,511002,Forestry Technician,511000,Victor Sullivan
+FOR,Wildfire Management,Nadine Ross,Band 5,520000,Executive Director,500000,Marcus Usman
+FOR,Wildfire Management,Rafe Adler,Band 4,521000,Director Wildfire Response,520000,Nadine Ross
+FOR,Wildfire Management,Harry Flynn,AO 24,521001,Logistics Coordinator,521000,Rafe Adler
+FOR,Wildfire Management,Charlie Cutter,AO 21,521002,Response Technician,521000,Rafe Adler
+WLRS,ADM Office,John Doe,ADM,600000,Assistant Deputy Minister,100000,Julien Santos
+WLRS,ADM Office,Jane Smith,AO 18,600001,Divisional Coordinator,600000,John Doe
+WLRS,Water Management,Alan Grant,Band 5,610000,Executive Director,600000,John Doe
+WLRS,Water Management,Ellie Sattler,Band 4,611000,Director Hydrology,610000,Alan Grant
+WLRS,Water Management,Ian Malcolm,IS 27,611001,Lead Hydrologist,611000,Ellie Sattler
+WLRS,Water Management,John Hammond,AO 24,611002,Resource Analyst,611000,Ellie Sattler
+WLRS,Land Stewardship,Lex Murphy,Band 5,620000,Executive Director,600000,John Doe
+WLRS,Land Stewardship,Tim Murphy,Band 4,621000,Director Land Use,620000,Lex Murphy
+WLRS,Land Stewardship,Donald Gennaro,AO 24,621001,Land Policy Analyst,621000,Tim Murphy
+WLRS,Land Stewardship,Dennis Nedry,IS 24,621002,GIS Specialist,621000,Tim Murphy`;
 
         // Utility algorithm to assign organizational ranking weight for sorting
         function getClassificationWeight(classification) {
             if (!classification) return 0;
             const cls = classification.toUpperCase();
             
-            // ADMs represent the top tier
+            if (cls.includes('DM') && !cls.includes('ADM')) return 2000; // Deputy Minister at the very top
             if (cls.includes('ADM')) return 1000;
-            
-            // Bands represent the management tier (Band 5 = 950, Band 1 = 910, etc.)
             if (cls.includes('BAND')) {
                 const match = cls.match(/\d+/);
                 const num = match ? parseInt(match[0]) : 0;
                 return 900 + (num * 10);
             }
             
-            // Operational roles (IS 27, AO 24, FO 18) sorted by their parsed number
             const match = cls.match(/\d+/);
             const num = match ? parseInt(match[0]) : 0;
             return num;
@@ -204,13 +290,12 @@ People & Culture,Lucius Fox,Band 5,80000047,200-8505,Director HR,22169593,Mei Mc
                     name: row['Name'],
                     title: row['Job Title'],
                     branch: row['Branch'],
+                    division: row['Division'],
                     classification: row['Classification'],
-                    department: row['Department'],
                     supervisorName: row['Supervisor Name']
                 };
             }).filter(node => node.id);
 
-            // Group disconnected roots to avoid crashing
             const rootNodes = nodes.filter(n => !n.parentId);
             if (rootNodes.length > 1) {
                 nodes.push({
@@ -218,98 +303,160 @@ People & Culture,Lucius Fox,Band 5,80000047,200-8505,Director HR,22169593,Mei Mc
                     parentId: '',
                     name: 'Organization Board',
                     title: 'Top Level',
-                    branch: 'Executive',
-                    classification: 'ADM', // Set dummy root to highest class
-                    department: '',
+                    branch: '',
+                    division: 'Ministry Executive',
+                    classification: 'DM',
                     supervisorName: ''
                 });
                 rootNodes.forEach(n => n.parentId = 'SYSTEM_ROOT');
             }
 
-            // SORTING LOGIC: Organizes siblings so ADMs -> Bands -> Operational (by number)
+            // SORTING LOGIC: Organizes siblings so DMs -> ADMs -> Bands -> Operational (by number)
             nodes.sort((a, b) => {
                 const weightA = getClassificationWeight(a.classification);
                 const weightB = getClassificationWeight(b.classification);
                 
-                // If weights are equal, sort alphabetically by name
                 if (weightA === weightB) {
                     return (a.name || '').localeCompare(b.name || '');
                 }
                 
-                // Sort Descending (highest weights first)
-                return weightB - weightA;
+                return weightB - weightA; // Descending order
             });
 
             return nodes;
         }
 
-        const branchColors = {
-            'Executive': '#0f172a', 
-            'Digital Services': '#2563eb', 
-            'Corporate Services': '#059669', 
-            'Infrastructure & Ops': '#d97706', 
-            'Data & Analytics': '#7c3aed', 
-            'People & Culture': '#db2777', 
-            'Cybersecurity': '#dc2626' 
+        // Color palette based on Divisions instead of generic branches
+        const divisionColors = {
+            'Ministry Executive': '#0f172a', // Slate 900
+            'NRRIS': '#2563eb', // Blue 600
+            'CSNR': '#059669', // Emerald 600
+            'ENV': '#d97706', // Amber 600
+            'FOR': '#7c3aed', // Violet 600
+            'WLRS': '#db2777' // Pink 600
         };
 
-        function getBranchColor(branchName) {
-            return branchColors[branchName] || '#475569';
+        function getDivisionColor(divisionName) {
+            return divisionColors[divisionName] || '#475569'; // Default Slate 600
         }
 
+        // Added Layout Management
         let isVertical = true;
         function toggleLayout() {
             isVertical = !isVertical;
             chart.layout(isVertical ? 'top' : 'left').render().fit();
         }
 
-        // Logic to manually open nodes based on Classification (Semantic Depth)
-        function expandSemantic(level) {
-            chart.collapseAll();
+        // Structure Dropdown Filters Management
+        function populateFilters() {
+            const divisionSelect = document.getElementById('divisionSelect');
+            const divisions = [...new Set(globalData.map(d => d.division))].filter(Boolean).sort();
             
-            // Expand the root node so the chart isn't invisible
-            const rootNode = globalData.find(d => !d.parentId);
-            if (rootNode) chart.setExpanded(rootNode.id);
+            divisionSelect.innerHTML = '<option value="">-- Select Division --</option>';
+            divisions.forEach(div => {
+                const opt = document.createElement('option');
+                opt.value = div;
+                opt.textContent = div;
+                divisionSelect.appendChild(opt);
+            });
+            
+            const branchSelect = document.getElementById('branchSelect');
+            branchSelect.innerHTML = '<option value="">-- Select Branch --</option>';
+            branchSelect.classList.add('hidden');
+        }
 
-            if (level === 'All') {
-                chart.expandAll().render().fit();
+        document.getElementById('divisionSelect').addEventListener('change', function(e) {
+            const selectedDiv = e.target.value;
+            const branchSelect = document.getElementById('branchSelect');
+            
+            if (!selectedDiv) {
+                branchSelect.classList.add('hidden');
+                resetFilters();
                 return;
             }
 
+            // Highlight and expand the chosen Division
+            highlightTeam('division', selectedDiv);
+
+            // Populate the Branch dropdown based on the chosen Division
+            const branches = [...new Set(globalData.filter(d => d.division === selectedDiv).map(d => d.branch))].filter(Boolean).sort();
+            
+            branchSelect.innerHTML = '<option value="">-- Select Branch --</option>';
+            branches.forEach(branch => {
+                const opt = document.createElement('option');
+                opt.value = branch;
+                opt.textContent = branch;
+                branchSelect.appendChild(opt);
+            });
+            
+            if (branches.length > 0) {
+                branchSelect.classList.remove('hidden');
+            } else {
+                branchSelect.classList.add('hidden');
+            }
+        });
+
+        document.getElementById('branchSelect').addEventListener('change', function(e) {
+            const selectedBranch = e.target.value;
+            if (selectedBranch) {
+                highlightTeam('branch', selectedBranch);
+            } else {
+                // If branch is deselected, fallback to highlighting the current Division
+                highlightTeam('division', document.getElementById('divisionSelect').value);
+            }
+        });
+
+        function resetFilters() {
+            // Reset dropdowns
+            document.getElementById('divisionSelect').value = '';
+            document.getElementById('branchSelect').classList.add('hidden');
+            document.getElementById('branchSelect').innerHTML = '<option value="">-- Select Branch --</option>';
+            
+            // Reset search input
+            document.getElementById('searchInput').value = '';
+            document.getElementById('searchResults').classList.add('hidden');
+            
+            // Clear highlights and collapse everything
+            chart.clearHighlighting();
+            globalData.forEach(d => d._highlightedTeam = false);
+            chart.collapseAll();
+            
+            // Open default hierarchy (e.g. up to ADMs)
+            const rootNode = globalData.find(d => !d.parentId);
+            if (rootNode) chart.setExpanded(rootNode.id);
+            
             globalData.forEach(node => {
                 const cls = (node.classification || '').toUpperCase();
-                
-                if (level === 'ADM') {
-                    // Level 1: Expand any node that is an ADM
-                    if (cls.includes('ADM')) {
-                        chart.setExpanded(node.id);
-                    }
-                } else if (level === 'Band') {
-                    // Level 2: Expand any node that is an ADM or a Band
-                    if (cls.includes('ADM') || cls.includes('BAND')) {
-                        chart.setExpanded(node.id);
-                    }
+                if (cls.includes('ADM')) {
+                    chart.setExpanded(node.id);
                 }
             });
             
             chart.render().fit();
         }
 
+        // Initialize the Chart
         function renderChart(data) {
             globalData = data;
+            
+            // Update the live employee count
             document.getElementById('employee-count').textContent = `${data.length} Employees loaded`;
             
+            // Populate our new structure filters
+            populateFilters();
+            
             if (chart) {
-                chart.data(data).render();
-                expandSemantic('ADM'); // Default to expanding Level 1
+                // If chart already exists, just update data
+                chart.data(data).render().fit();
                 return;
             }
 
+            // Create new chart
             chart = new d3.OrgChart()
                 .container('#chart-container')
                 .data(data)
-                .nodeWidth(d => 260)
-                .nodeHeight(d => 120)
+                .nodeWidth(d => 270)
+                .nodeHeight(d => 125)
                 .childrenMargin(d => 50)
                 .compactMarginBetween(d => 30)
                 .compactMarginPair(d => 60)
@@ -317,18 +464,20 @@ People & Culture,Lucius Fox,Band 5,80000047,200-8505,Director HR,22169593,Mei Mc
                     d3.select(this)
                         .attr("stroke", d => {
                             if (d.data._highlightedTeam && d.parent && d.parent.data._highlightedTeam) {
-                                return getBranchColor(d.data.branch);
+                                return getDivisionColor(d.data.division);
                             }
-                            return "#cbd5e1"; 
+                            return "#e2e8f0"; 
                         })
                         .attr("stroke-width", d => {
-                            if (d.data._highlightedTeam && d.parent && d.parent.data._highlightedTeam) return 4;
-                            return 1.5;
+                            if (d.data._highlightedTeam && d.parent && d.parent.data._highlightedTeam) {
+                                return 4; 
+                            }
+                            return 1.5; 
                         });
                 })
                 .nodeContent(function(d, i, arr, state) {
-                    const color = getBranchColor(d.data.branch);
-                    const initials = d.data.name ? d.data.name.split(' ').map(n => n[0]).join('').substring(0,2) : '--';
+                    const color = getDivisionColor(d.data.division);
+                    const initials = d.data.name && d.data.name.trim() ? d.data.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase() : '??';
                     
                     const isHighlighted = d.data._highlightedTeam;
                     const cardStyle = isHighlighted 
@@ -336,14 +485,17 @@ People & Culture,Lucius Fox,Band 5,80000047,200-8505,Director HR,22169593,Mei Mc
                         : `border: 1px solid #e2e8f0; background-color: white;`;
                     
                     return `
-                    <div class="node-card" style="font-family: ui-sans-serif, system-ui, sans-serif; ${cardStyle} border-radius: 12px; width: ${d.width}px; height: ${d.height}px; display: flex; flex-direction: column; overflow: hidden; cursor: pointer; position: relative;">
+                    <div class="node-card" style="font-family: ui-sans-serif, system-ui, sans-serif; ${cardStyle} border-radius: 12px; width: ${d.width}px; height: ${d.height}px; display: flex; flex-direction: column; overflow: hidden; cursor: pointer; position: relative; transition: all 0.2s ease;">
+                        <!-- Division Color Bar -->
                         <div style="height: 6px; width: 100%; background-color: ${color};"></div>
                         
                         <div style="padding: 16px; display: flex; align-items: center; gap: 12px; flex: 1;">
+                            <!-- Avatar -->
                             <div style="width: 48px; height: 48px; border-radius: 9999px; background-color: #f1f5f9; display: flex; align-items: center; justify-content: center; font-weight: bold; color: ${color}; font-size: 16px; border: 1px solid #e2e8f0; flex-shrink: 0;">
                                 ${initials}
                             </div>
                             
+                            <!-- Text Data -->
                             <div style="overflow: hidden;">
                                 <div style="font-weight: 700; font-size: 15px; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                     ${d.data.name}
@@ -351,12 +503,13 @@ People & Culture,Lucius Fox,Band 5,80000047,200-8505,Director HR,22169593,Mei Mc
                                 <div style="font-size: 12px; color: #475569; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                     ${d.data.title}
                                 </div>
-                                <div style="font-size: 11px; font-weight: 600; color: ${color}; margin-top: 6px; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                    ${d.data.branch}
+                                <div style="font-size: 10px; font-weight: 600; color: ${color}; margin-top: 6px; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    ${d.data.division} • ${d.data.branch}
                                 </div>
                             </div>
                         </div>
 
+                        <!-- Expand/Collapse Indicator -->
                         ${d.data._directSubordinates > 0 ? `
                         <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 24px; background-color: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #64748b; font-weight: 500;">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
@@ -376,16 +529,17 @@ People & Culture,Lucius Fox,Band 5,80000047,200-8505,Director HR,22169593,Mei Mc
                     showProfile(d.data);
                     chart.setCentered(d.data.id).render();
                 })
-                .render();
-
-            // Default behavior: Open ADMs immediately after drawing
-            expandSemantic('ADM');
+                .render()
+                .expandAll()
+                .fit();
         }
 
         Papa.parse(defaultCSV, {
-            header: true, skipEmptyLines: true,
+            header: true,
+            skipEmptyLines: true,
             complete: function(results) {
-                renderChart(mapDataForChart(results.data));
+                const mapped = mapDataForChart(results.data);
+                renderChart(mapped);
             }
         });
 
@@ -398,7 +552,8 @@ People & Culture,Lucius Fox,Band 5,80000047,200-8505,Director HR,22169593,Mei Mc
             statusEl.classList.remove('hidden');
 
             Papa.parse(file, {
-                header: true, skipEmptyLines: true,
+                header: true,
+                skipEmptyLines: true,
                 complete: function(results) {
                     try {
                         const mapped = mapDataForChart(results.data);
@@ -408,7 +563,9 @@ People & Culture,Lucius Fox,Band 5,80000047,200-8505,Director HR,22169593,Mei Mc
                         statusEl.classList.add('text-green-600');
                         setTimeout(() => statusEl.classList.add('hidden'), 3000);
                     } catch (err) {
+                        console.error(err);
                         statusEl.textContent = 'Error: ' + err.message;
+                        statusEl.classList.remove('text-green-600');
                         statusEl.classList.add('text-red-600');
                     }
                 }
@@ -429,8 +586,9 @@ People & Culture,Lucius Fox,Band 5,80000047,200-8505,Director HR,22169593,Mei Mc
                 return;
             }
 
-            const branches = [...new Set(globalData.map(d => d.branch))].filter(b => b && b.toLowerCase().includes(query));
-            const departments = [...new Set(globalData.map(d => d.department))].filter(dp => dp && dp.toLowerCase().includes(query));
+            const divisions = [...new Set(globalData.map(d => d.division))].filter(b => b && b.toLowerCase().includes(query));
+            const branches = [...new Set(globalData.map(d => d.branch))].filter(dp => dp && dp.toLowerCase().includes(query));
+
             const people = globalData.filter(d => 
                 (d.name && d.name.toLowerCase().includes(query)) || 
                 (d.title && d.title.toLowerCase().includes(query))
@@ -439,23 +597,33 @@ People & Culture,Lucius Fox,Band 5,80000047,200-8505,Director HR,22169593,Mei Mc
             searchResults.innerHTML = '';
             let hasResults = false;
 
-            branches.forEach(branch => {
+            divisions.forEach(divName => {
                 hasResults = true;
                 const div = document.createElement('div');
                 div.className = 'p-3 border-b border-slate-100 hover:bg-blue-50 cursor-pointer flex items-center gap-3';
-                div.innerHTML = `<div class="p-2 bg-blue-100 text-blue-600 rounded-lg shrink-0"><i data-lucide="users" class="w-4 h-4"></i></div>
-                    <div class="flex flex-col"><span class="text-sm font-bold text-slate-800">${branch}</span><span class="text-xs text-slate-500">Entire Team / Branch</span></div>`;
-                div.onclick = () => highlightTeam('branch', branch);
+                div.innerHTML = `
+                    <div class="p-2 bg-blue-100 text-blue-600 rounded-lg shrink-0"><i data-lucide="building-2" class="w-4 h-4"></i></div>
+                    <div class="flex flex-col">
+                        <span class="text-sm font-bold text-slate-800">${divName}</span>
+                        <span class="text-xs text-slate-500">Entire Division</span>
+                    </div>
+                `;
+                div.onclick = () => highlightTeam('division', divName);
                 searchResults.appendChild(div);
             });
 
-            departments.forEach(dept => {
+            branches.forEach(branch => {
                 hasResults = true;
                 const div = document.createElement('div');
                 div.className = 'p-3 border-b border-slate-100 hover:bg-emerald-50 cursor-pointer flex items-center gap-3';
-                div.innerHTML = `<div class="p-2 bg-emerald-100 text-emerald-600 rounded-lg shrink-0"><i data-lucide="building" class="w-4 h-4"></i></div>
-                    <div class="flex flex-col"><span class="text-sm font-bold text-slate-800">Dept: ${dept}</span><span class="text-xs text-slate-500">Entire Department</span></div>`;
-                div.onclick = () => highlightTeam('department', dept);
+                div.innerHTML = `
+                    <div class="p-2 bg-emerald-100 text-emerald-600 rounded-lg shrink-0"><i data-lucide="users" class="w-4 h-4"></i></div>
+                    <div class="flex flex-col">
+                        <span class="text-sm font-bold text-slate-800">Branch: ${branch}</span>
+                        <span class="text-xs text-slate-500">Entire Branch</span>
+                    </div>
+                `;
+                div.onclick = () => highlightTeam('branch', branch);
                 searchResults.appendChild(div);
             });
 
@@ -464,16 +632,24 @@ People & Culture,Lucius Fox,Band 5,80000047,200-8505,Director HR,22169593,Mei Mc
                     hasResults = true;
                     const div = document.createElement('div');
                     div.className = 'p-3 border-b border-slate-100 hover:bg-slate-50 cursor-pointer flex items-center gap-3';
-                    div.innerHTML = `<div class="p-2 bg-slate-100 text-slate-600 rounded-lg shrink-0"><i data-lucide="user" class="w-4 h-4"></i></div>
-                        <div class="flex flex-col"><span class="text-sm font-bold text-slate-800">${r.name}</span><span class="text-xs text-slate-500">${r.title} • ${r.branch}</span></div>`;
+                    div.innerHTML = `
+                        <div class="p-2 bg-slate-100 text-slate-600 rounded-lg shrink-0"><i data-lucide="user" class="w-4 h-4"></i></div>
+                        <div class="flex flex-col">
+                            <span class="text-sm font-bold text-slate-800">${r.name}</span>
+                            <span class="text-xs text-slate-500">${r.title} • ${r.division}</span>
+                        </div>
+                    `;
                     div.onclick = () => {
                         searchResults.classList.add('hidden');
                         searchInput.value = r.name;
+                        
                         globalData.forEach(d => d._highlightedTeam = false);
+                        
                         chart.clearHighlighting();
                         chart.setUpToTheRootHighlighted(r.id);
                         chart.setCentered(r.id);
                         chart.render();
+                        
                         showProfile(r);
                     };
                     searchResults.appendChild(div);
@@ -482,7 +658,7 @@ People & Culture,Lucius Fox,Band 5,80000047,200-8505,Director HR,22169593,Mei Mc
 
             if (hasResults) {
                 searchResults.classList.remove('hidden');
-                lucide.createIcons();
+                lucide.createIcons(); 
             } else {
                 searchResults.innerHTML = '<div class="p-4 text-sm text-slate-500 text-center">No results found</div>';
                 searchResults.classList.remove('hidden');
@@ -491,15 +667,22 @@ People & Culture,Lucius Fox,Band 5,80000047,200-8505,Director HR,22169593,Mei Mc
 
         function highlightTeam(type, value) {
             searchResults.classList.add('hidden');
-            searchInput.value = value;
+            // Check if we are searching or clicking the dropdown
+            if (document.getElementById('searchInput').value) {
+                document.getElementById('searchInput').value = value;
+            }
+            
             chart.clearHighlighting();
 
             const teamNodes = globalData.filter(d => d[type] === value);
             const teamIds = new Set(teamNodes.map(d => d.id));
+            
             const teamLeaders = teamNodes.filter(d => !teamIds.has(d.parentId));
             const mainLeader = teamLeaders.length > 0 ? teamLeaders[0] : null;
 
-            globalData.forEach(d => { d._highlightedTeam = (d[type] === value); });
+            globalData.forEach(d => {
+                d._highlightedTeam = (d[type] === value);
+            });
 
             chart.collapseAll();
 
@@ -512,10 +695,15 @@ People & Culture,Lucius Fox,Band 5,80000047,200-8505,Director HR,22169593,Mei Mc
                 }
             }
 
-            teamNodes.forEach(node => { chart.setExpanded(node.id); });
+            teamNodes.forEach(node => {
+                chart.setExpanded(node.id);
+            });
 
             chart.render();
-            setTimeout(() => { chart.fit(); }, 300);
+            setTimeout(() => {
+                chart.fit();
+            }, 300);
+            
             closeProfile();
         }
 
@@ -528,14 +716,17 @@ People & Culture,Lucius Fox,Band 5,80000047,200-8505,Director HR,22169593,Mei Mc
         const profilePanel = document.getElementById('profilePanel');
         
         function showProfile(data) {
-            const initials = data.name ? data.name.split(' ').map(n => n[0]).join('').substring(0,2) : '--';
+            const initials = data.name && data.name.trim() ? data.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase() : '??';
+            
             document.getElementById('profileAvatar').textContent = initials;
-            document.getElementById('profileAvatar').style.color = getBranchColor(data.branch);
+            document.getElementById('profileAvatar').style.color = getDivisionColor(data.division);
             document.getElementById('profileName').textContent = data.name || 'Unknown';
             document.getElementById('profileTitle').textContent = data.title || 'Unknown Position';
-            document.getElementById('profileBranch').textContent = data.branch || 'No Branch';
+            document.getElementById('profileBranch').textContent = `${data.division} • ${data.branch}`;
+            
             document.getElementById('profilePosId').textContent = data.id || 'N/A';
-            document.getElementById('profileDept').textContent = data.department || 'N/A';
+            document.getElementById('profileDivision').textContent = data.division || 'N/A';
+            document.getElementById('profileBranchDetail').textContent = data.branch || 'N/A';
             document.getElementById('profileClass').textContent = data.classification || 'N/A';
             document.getElementById('profileSupervisor').textContent = data.supervisorName || 'Root / None';
 
