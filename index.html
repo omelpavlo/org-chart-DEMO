@@ -16,6 +16,10 @@
     <!-- PapaParse for parsing the CSV file in the browser -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 
+    <!-- PDF Export Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -29,15 +33,24 @@
         /* Node Animations */
         .node-card { transition: box-shadow 0.2s, border-color 0.2s; }
         .node-card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border-color: #94a3b8; }
+
+        /* Presentation Mode */
+        body.presentation-mode { background-color: #ffffff !important; }
+        body.presentation-mode .floating-panel { display: none !important; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 h-screen w-screen overflow-hidden font-sans selection:bg-blue-200">
+<body class="bg-slate-50 text-slate-800 h-screen w-screen overflow-hidden font-sans selection:bg-blue-200 transition-colors duration-300">
+
+    <!-- Exit Presentation Button (Hidden by Default) -->
+    <button id="exitPresentationBtn" onclick="togglePresentationMode()" class="hidden fixed top-6 right-6 z-50 bg-slate-900 text-white px-4 py-2 rounded-lg font-semibold shadow-lg hover:bg-slate-800 transition flex items-center gap-2">
+        <i data-lucide="monitor-x" class="w-4 h-4"></i> Exit Presentation
+    </button>
 
     <!-- The Infinite Canvas Container -->
     <div id="chart-container" class="w-full h-full cursor-grab active:cursor-grabbing"></div>
 
     <!-- Floating UI: Top Left (Controls & Search) -->
-    <div class="absolute top-4 left-4 w-80 flex flex-col gap-3 z-10">
+    <div class="floating-panel absolute top-4 left-4 w-64 flex flex-col gap-3 z-10">
         <!-- App Header & File Upload -->
         <div class="bg-white/90 backdrop-blur shadow-lg border border-slate-200 rounded-xl p-4">
             <div class="flex justify-between items-center cursor-pointer select-none" onclick="toggleSection('headerContent', 'headerIcon')">
@@ -46,11 +59,11 @@
                     Org Explorer
                 </h1>
                 <button class="p-1 hover:bg-slate-100 rounded-md transition-colors text-slate-400">
-                    <i data-lucide="chevron-up" id="headerIcon" class="w-4 h-4 transition-transform duration-200"></i>
+                    <i data-lucide="chevron-up" id="headerIcon" class="w-4 h-4 transition-transform duration-200 rotate-180"></i>
                 </button>
             </div>
             
-            <div id="headerContent" class="mt-3">
+            <div id="headerContent" class="mt-3 hidden">
                 <div id="employee-count" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mb-3">0 Employees loaded</div>
                 <p class="text-xs text-slate-500 mb-4">Upload your PeopleSoft CSV to map the hierarchy.</p>
                 
@@ -86,37 +99,38 @@
             </div>
             
             <div id="exploreContent" class="flex flex-col mt-4">
-                <div id="divisionButtons" class="flex flex-wrap gap-2 mb-3">
-                    <!-- Division Buttons injected here -->
-                </div>
-                <div id="branchFilterContainer" class="hidden flex flex-col gap-2 mb-2">
-                    <select id="branchSelect" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-slate-700">
+                <button onclick="resetFilters()" class="w-full bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 font-bold py-2 rounded-lg text-xs transition-colors mb-3 shadow-sm flex justify-center items-center gap-2">
+                    <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+                    Reset View
+                </button>
+                <div class="flex flex-col gap-2">
+                    <select id="divisionSelect" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-slate-700">
+                        <option value="">-- Select Division --</option>
+                    </select>
+                    <select id="branchSelect" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-slate-700 hidden">
                         <option value="">-- Select Branch --</option>
                     </select>
                 </div>
-                <button onclick="resetFilters()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 rounded-lg text-xs transition-colors mt-1">
-                    Reset View
-                </button>
             </div>
         </div>
     </div>
 
     <!-- Floating UI: Right Side (Employee Profile Panel) -->
-    <div id="profilePanel" class="absolute top-4 right-4 w-80 bg-white shadow-2xl border border-slate-200 rounded-xl flex flex-col z-10 transition-transform duration-300 translate-x-[120%] opacity-0 h-[calc(100vh-2rem)]">
-        <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 rounded-t-xl">
+    <div id="profilePanel" class="floating-panel absolute top-4 right-4 w-80 bg-white shadow-2xl border border-slate-200 rounded-xl flex flex-col z-10 transition-transform duration-300 translate-x-[120%] opacity-0 h-[calc(100vh-2rem)]">
+        <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 rounded-t-xl shrink-0">
             <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Employee Profile</h2>
             <button onclick="closeProfile()" class="p-1 hover:bg-slate-200 rounded-md text-slate-400 hover:text-slate-700 transition-colors">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
         </div>
         
-        <div class="p-6 flex flex-col items-center border-b border-slate-100">
+        <div class="p-6 flex flex-col items-center border-b border-slate-100 shrink-0">
             <!-- Avatar Placeholder -->
             <div id="profileAvatar" class="w-20 h-20 rounded-full bg-blue-100 border-4 border-white shadow-sm flex items-center justify-center text-2xl font-bold text-blue-600 mb-3">
                 JS
             </div>
             <h3 id="profileName" class="text-xl font-bold text-slate-900 text-center">Julien Santos</h3>
-            <p id="profileTitle" class="text-sm text-blue-600 font-medium text-center text-center mt-1">Associate Deputy Minister</p>
+            <p id="profileTitle" class="text-sm text-blue-600 font-medium text-center mt-1">Associate Deputy Minister</p>
             <span id="profileBranch" class="mt-3 px-3 py-1 bg-slate-100 text-slate-600 text-xs font-semibold rounded-full border border-slate-200">Executive</span>
         </div>
 
@@ -144,11 +158,22 @@
                     <p id="profileSupervisor" class="text-sm font-medium text-slate-800">-</p>
                 </div>
             </div>
+
+            <!-- Chain of Command Breadcrumbs -->
+            <div class="mt-8 border-t border-slate-100 pt-5">
+                <h4 class="text-xs font-bold text-slate-400 uppercase mb-4 tracking-wider">Reporting Path</h4>
+                <div id="profileChain" class="flex flex-col gap-0 text-sm">
+                    <!-- Chain injected here -->
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Floating UI: Bottom Right (Zoom Controls) -->
-    <div class="absolute bottom-6 right-6 bg-white shadow-lg border border-slate-200 rounded-lg flex flex-col z-10 overflow-hidden">
+    <div class="floating-panel absolute bottom-6 right-6 bg-white shadow-lg border border-slate-200 rounded-lg flex flex-col z-10 overflow-hidden">
+        <button onclick="togglePresentationMode()" class="p-3 text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-colors border-b border-slate-100" title="Presentation Mode">
+            <i data-lucide="monitor-play" class="w-5 h-5"></i>
+        </button>
         <button onclick="chart.zoomIn()" class="p-3 text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-colors border-b border-slate-100" title="Zoom In">
             <i data-lucide="zoom-in" class="w-5 h-5"></i>
         </button>
@@ -167,8 +192,11 @@
         <button onclick="toggleLayout()" class="p-3 text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-colors border-b border-slate-100" title="Toggle Layout (Vertical/Horizontal)">
             <i data-lucide="arrow-right-left" class="w-5 h-5"></i>
         </button>
-        <button onclick="chart.exportImg({full: true})" class="p-3 text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-colors" title="Export as Image">
-            <i data-lucide="download" class="w-5 h-5"></i>
+        <button onclick="chart.exportImg({full: true})" class="p-3 text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-colors border-b border-slate-100" title="Export as Image">
+            <i data-lucide="image" class="w-5 h-5"></i>
+        </button>
+        <button onclick="exportToPdf()" class="p-3 text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-colors" title="Export as PDF">
+            <i data-lucide="file-text" class="w-5 h-5"></i>
         </button>
     </div>
 
@@ -190,27 +218,48 @@
             }
         }
 
+        // Presentation Mode Logic
+        let isPresentationMode = false;
+        function togglePresentationMode() {
+            isPresentationMode = !isPresentationMode;
+            if (isPresentationMode) {
+                document.body.classList.add('presentation-mode');
+                document.getElementById('exitPresentationBtn').classList.remove('hidden');
+            } else {
+                document.body.classList.remove('presentation-mode');
+                document.getElementById('exitPresentationBtn').classList.add('hidden');
+            }
+            setTimeout(() => chart.fit(), 300); // Refit chart to new visible area
+        }
+
+        // PDF Export Wrapper
+        function exportToPdf() {
+            if (window.jspdf && chart) {
+                chart.exportPdf({ format: 'a4', landscape: true });
+            }
+        }
+
         let chart;
         let globalData = [];
 
-        // Fallback Data based on the new Strict Ministry Org format
+        // Fallback Data with Vacancies Injected (~10%)
         const defaultCSV = `Division,Branch,Name,Classification,Position ID,Job Title,Supervisor Position ID,Supervisor Name
 Ministry Executive,Deputy Minister's Office,Julien Santos,DM,100000,Deputy Minister,,
 Ministry Executive,Deputy Minister's Office,Bruce Wayne,Band 2,100001,Executive Assistant,100000,Julien Santos
-Ministry Executive,Deputy Minister's Office,Alfred Pennyworth,AO 24,100002,Senior Advisor,100000,Julien Santos
+Ministry Executive,Deputy Minister's Office,Vacant,AO 24,100002,Senior Advisor,100000,Julien Santos
 NRRIS,ADM Office,Rohan Rahman,ADM,200000,Assistant Deputy Minister,100000,Julien Santos
 NRRIS,ADM Office,Lois Lane,AO 18,200001,Divisional Coordinator,200000,Rohan Rahman
 NRRIS,Digital Services,Clark Kent,Band 5,210000,Executive Director,200000,Rohan Rahman
 NRRIS,Digital Services,Barry Allen,Band 4,211000,Director Frontend Development,210000,Clark Kent
 NRRIS,Digital Services,Wally West,IS 27,211001,Lead Developer,211000,Barry Allen
-NRRIS,Digital Services,Kyle Rayner,IS 24,211002,Full Stack Developer,211000,Barry Allen
+NRRIS,Digital Services,Vacant,IS 24,211002,Full Stack Developer,211000,Barry Allen
 NRRIS,Digital Services,Jessica Cruz,IS 21,211003,Frontend Developer,211000,Barry Allen
 NRRIS,Digital Services,Simon Baz,IS 21,211004,Frontend Developer,211000,Barry Allen
-NRRIS,Digital Services,Guy Gardner,IS 21,211005,Junior Developer,211000,Barry Allen
+NRRIS,Digital Services,Vacant,IS 21,211005,Junior Developer,211000,Barry Allen
 NRRIS,Digital Services,Victor Stone,Band 4,212000,Director Backend Systems,210000,Clark Kent
 NRRIS,Digital Services,Ron Troupe,IS 27,212001,Cloud Architect,212000,Victor Stone
 NRRIS,Digital Services,Steve Lombard,IS 24,212002,Systems Engineer,212000,Victor Stone
-NRRIS,Digital Services,Cat Grant,IS 24,212003,Database Administrator,212000,Victor Stone
+NRRIS,Digital Services,Vacant,IS 24,212003,Database Administrator,212000,Victor Stone
 NRRIS,Digital Services,Lucy Lane,IS 21,212004,Backend Developer,212000,Victor Stone
 NRRIS,Digital Services,Jimmy Olsen,IS 21,212005,Backend Developer,212000,Victor Stone
 NRRIS,Digital Services,Arthur Curry,Band 3,213000,Manager UX Design,210000,Clark Kent
@@ -220,12 +269,12 @@ NRRIS,Digital Services,Garth Tempest,IS 21,213003,UI Designer,213000,Arthur Curr
 NRRIS,Digital Services,Ororo Munroe,Band 4,214000,Director Quality Assurance,210000,Clark Kent
 NRRIS,Digital Services,Logan Howlett,IS 27,214001,Lead QA Engineer,214000,Ororo Munroe
 NRRIS,Digital Services,Scott Summers,IS 24,214002,QA Automation Engineer,214000,Ororo Munroe
-NRRIS,Digital Services,Jean Grey,IS 24,214003,QA Analyst,214000,Ororo Munroe
+NRRIS,Digital Services,Vacant,IS 24,214003,QA Analyst,214000,Ororo Munroe
 NRRIS,Digital Services,Kurt Wagner,IS 21,214004,Junior Tester,214000,Ororo Munroe
 NRRIS,Digital Services,Anna Marie,IS 21,214005,Junior Tester,214000,Ororo Munroe
 NRRIS,Digital Services,Hank McCoy,Band 4,215000,Director DevOps,210000,Clark Kent
 NRRIS,Digital Services,Bobby Drake,IS 27,215001,Lead DevOps Engineer,215000,Hank McCoy
-NRRIS,Digital Services,Warren Worthington,IS 24,215002,SRE Engineer,215000,Hank McCoy
+NRRIS,Digital Services,Vacant,IS 24,215002,SRE Engineer,215000,Hank McCoy
 NRRIS,Digital Services,Alex Summers,IS 24,215003,Cloud Ops Specialist,215000,Hank McCoy
 NRRIS,Digital Services,Lorna Dane,IS 21,215004,Release Manager,215000,Hank McCoy
 NRRIS,Digital Services,Sean Cassidy,IS 21,215005,SysAdmin,215000,Hank McCoy
@@ -237,27 +286,27 @@ NRRIS,Client Services,Barbara Minerva,AO 21,221003,Service Coordinator,221000,St
 NRRIS,Client Services,Donna Troy,Band 4,222000,Director Helpdesk Ops,220000,Diana Prince
 NRRIS,Client Services,Cassie Sandsmark,IS 21,222001,IT Support Specialist,222000,Donna Troy
 NRRIS,Client Services,Jason Blood,IS 21,222002,IT Support Specialist,222000,Donna Troy
-NRRIS,Client Services,Zatanna Zatara,IS 21,222003,IT Support Specialist,222000,Donna Troy
+NRRIS,Client Services,Vacant,IS 21,222003,IT Support Specialist,222000,Donna Troy
 NRRIS,Data & Analytics,Oliver Queen,Band 5,230000,Executive Director,200000,Rohan Rahman
 NRRIS,Data & Analytics,Felicity Smoak,Band 4,231000,Director Data Science,230000,Oliver Queen
 NRRIS,Data & Analytics,Curtis Holt,IS 27,231001,Lead Data Scientist,231000,Felicity Smoak
 NRRIS,Data & Analytics,Rene Ramirez,IS 24,231002,Data Scientist,231000,Felicity Smoak
 NRRIS,Data & Analytics,Dinah Drake,IS 24,231003,Data Engineer,231000,Felicity Smoak
-NRRIS,Data & Analytics,Roy Harper,Band 4,232000,Director BI & Reporting,230000,Oliver Queen
+NRRIS,Data & Analytics,Vacant,Band 4,232000,Director BI & Reporting,230000,Oliver Queen
 NRRIS,Data & Analytics,Thea Queen,IS 24,232001,BI Developer,232000,Roy Harper
 NRRIS,Data & Analytics,Mia Smoak,IS 21,232002,Data Analyst,232000,Roy Harper
 NRRIS,Data & Analytics,Connor Hawke,IS 21,232003,Data Analyst,232000,Roy Harper
 NRRIS,Data & Analytics,Emma Frost,Band 4,233000,Director Data Engineering,230000,Oliver Queen
 NRRIS,Data & Analytics,Piotr Rasputin,IS 27,233001,Lead Data Engineer,233000,Emma Frost
 NRRIS,Data & Analytics,Illyana Rasputin,IS 24,233002,Data Pipeline Dev,233000,Emma Frost
-NRRIS,Data & Analytics,Kitty Pryde,IS 24,233003,ETL Specialist,233000,Emma Frost
+NRRIS,Data & Analytics,Vacant,IS 24,233003,ETL Specialist,233000,Emma Frost
 NRRIS,Data & Analytics,Jubilation Lee,IS 21,233004,Data Support Analyst,233000,Emma Frost
 NRRIS,Data & Analytics,Remy LeBeau,IS 21,233005,Data Support Analyst,233000,Emma Frost
 NRRIS,Data & Analytics,Alison Blaire,IS 21,233006,Junior Data Engineer,233000,Emma Frost
 NRRIS,PMO,Leia Organa,Band 5,240000,Executive Director,200000,Rohan Rahman
 NRRIS,PMO,Han Solo,Band 4,241000,Director Agile Projects,240000,Leia Organa
 NRRIS,PMO,Chewbacca,IS 27,241001,Senior Scrum Master,241000,Han Solo
-NRRIS,PMO,Luke Skywalker,IS 24,241002,Agile Coach,241000,Han Solo
+NRRIS,PMO,Vacant,IS 24,241002,Agile Coach,241000,Han Solo
 NRRIS,PMO,Lando Calrissian,IS 24,241003,Project Manager,241000,Han Solo
 NRRIS,PMO,Ackbar,IS 21,241004,Project Coordinator,241000,Han Solo
 NRRIS,PMO,Mon Mothma,IS 21,241005,Project Analyst,241000,Han Solo
@@ -270,14 +319,14 @@ NRRIS,PMO,Plo Koon,IS 21,242005,Project Analyst,242000,Padme Amidala
 NRRIS,PMO,Kit Fisto,IS 21,242006,Project Analyst,242000,Padme Amidala
 NRRIS,PMO,Ki-Adi-Mundi,IS 21,242007,Junior Analyst,242000,Padme Amidala
 NRRIS,PMO,Shaak Ti,IS 18,242008,PMO Admin,242000,Padme Amidala
-NRRIS,PMO,Aayla Secura,IS 18,242009,PMO Admin,242000,Padme Amidala
+NRRIS,PMO,Vacant,IS 18,242009,PMO Admin,242000,Padme Amidala
 NRRIS,Cybersecurity Ops,Nick Fury,Band 5,250000,Executive Director,200000,Rohan Rahman
 NRRIS,Cybersecurity Ops,Maria Hill,Band 4,251000,Director SecOps,250000,Nick Fury
 NRRIS,Cybersecurity Ops,Phil Coulson,IS 27,251001,Lead Security Engineer,251000,Maria Hill
 NRRIS,Cybersecurity Ops,Melinda May,IS 24,251002,Security Engineer,251000,Maria Hill
 NRRIS,Cybersecurity Ops,Daisy Johnson,IS 24,251003,Incident Responder,251000,Maria Hill
 NRRIS,Cybersecurity Ops,Leo Fitz,IS 21,251004,SOC Analyst,251000,Maria Hill
-NRRIS,Cybersecurity Ops,Jemma Simmons,IS 21,251005,SOC Analyst,251000,Maria Hill
+NRRIS,Cybersecurity Ops,Vacant,IS 21,251005,SOC Analyst,251000,Maria Hill
 NRRIS,Cybersecurity Ops,Mack Mackenzie,IS 21,251006,SOC Analyst,251000,Maria Hill
 NRRIS,Cybersecurity Ops,Elena Rodriguez,IS 21,251007,SOC Analyst,251000,Maria Hill
 NRRIS,Cybersecurity Ops,Sharon Carter,Band 4,252000,Director Threat Intel,250000,Nick Fury
@@ -286,7 +335,7 @@ NRRIS,Cybersecurity Ops,Howard Stark,IS 24,252002,Vulnerability Researcher,25200
 NRRIS,Cybersecurity Ops,Arnim Zola,IS 24,252003,Malware Analyst,252000,Sharon Carter
 NRRIS,Cybersecurity Ops,Anton Vanko,IS 21,252004,Threat Intel Analyst,252000,Sharon Carter
 NRRIS,Cybersecurity Ops,Johann Schmidt,IS 21,252005,Threat Intel Analyst,252000,Sharon Carter
-NRRIS,Cybersecurity Ops,Heinrich Zemo,IS 21,252006,Threat Intel Analyst,252000,Sharon Carter
+NRRIS,Cybersecurity Ops,Vacant,IS 21,252006,Threat Intel Analyst,252000,Sharon Carter
 DIV3,ADM Office,Liam McIntyre,ADM,300000,Assistant Deputy Minister,100000,Julien Santos
 DIV3,ADM Office,Kara Danvers,AO 18,300001,Divisional Coordinator,300000,Liam McIntyre
 DIV3,Financial Services,Miguel Petrov,Band 5,310000,Executive Director,300000,Liam McIntyre
@@ -298,7 +347,7 @@ DIV3,Financial Services,Vision,FO 21,311004,Accounts Payable Specialist,311000,J
 DIV3,Financial Services,Pietro Maximoff,FO 21,311005,Accounts Receivable Specialist,311000,John Constantine
 DIV3,Financial Services,Carol Danvers,FO 21,311006,Reconciliation Analyst,311000,John Constantine
 DIV3,Financial Services,Monica Rambeau,FO 18,311007,Accounting Clerk,311000,John Constantine
-DIV3,Financial Services,Kamala Khan,FO 18,311008,Accounting Clerk,311000,John Constantine
+DIV3,Financial Services,Vacant,FO 18,311008,Accounting Clerk,311000,John Constantine
 DIV3,Financial Services,Ray Palmer,Band 4,312000,Director Procurement,310000,Miguel Petrov
 DIV3,Financial Services,Carter Hall,AO 24,312001,Senior Procurement Officer,312000,Ray Palmer
 DIV3,Financial Services,Kendra Saunders,AO 21,312002,Procurement Officer,312000,Ray Palmer
@@ -306,7 +355,7 @@ DIV3,Financial Services,Bruce Banner,Band 4,313000,Director Budgeting,310000,Mig
 DIV3,Financial Services,Natasha Romanoff,FO 24,313001,Senior Budget Analyst,313000,Bruce Banner
 DIV3,Financial Services,Clint Barton,FO 24,313002,Financial Forecaster,313000,Bruce Banner
 DIV3,Financial Services,Sam Wilson,FO 21,313003,Budget Coordinator,313000,Bruce Banner
-DIV3,Financial Services,Bucky Barnes,FO 21,313004,Budget Analyst,313000,Bruce Banner
+DIV3,Financial Services,Vacant,FO 21,313004,Budget Analyst,313000,Bruce Banner
 DIV3,Financial Services,Wanda Maximoff,FO 18,313005,Finance Clerk,313000,Bruce Banner
 DIV3,People & Culture,Mei Lin,Band 5,320000,Executive Director,300000,Liam McIntyre
 DIV3,People & Culture,Lucius Fox,Band 4,321000,Director Talent Acquisition,320000,Mei Lin
@@ -314,7 +363,7 @@ DIV3,People & Culture,Rachel Dawes,AO 24,321001,Senior Recruiter,321000,Lucius F
 DIV3,People & Culture,Harvey Dent,AO 21,321002,Technical Recruiter,321000,Lucius Fox
 DIV3,People & Culture,Carmine Falcone,Band 4,322000,Director Employee Relations,320000,Mei Lin
 DIV3,People & Culture,Sal Maroni,AO 24,322001,HR Business Partner,322000,Carmine Falcone
-DIV3,People & Culture,Sofia Falcone,AO 21,322002,HR Generalist,322000,Carmine Falcone
+DIV3,People & Culture,Vacant,AO 21,322002,HR Generalist,322000,Carmine Falcone
 DIV3,People & Culture,Stephen Strange,Band 4,323000,Director Learning & Dev,320000,Mei Lin
 DIV3,People & Culture,Wong,AO 24,323001,Senior Training Specialist,323000,Stephen Strange
 DIV3,People & Culture,America Chavez,AO 21,323002,Training Coordinator,323000,Stephen Strange
@@ -324,7 +373,7 @@ DIV3,People & Culture,Reed Richards,Band 4,324000,Director Comp & Benefits,32000
 DIV3,People & Culture,Sue Storm,AO 24,324001,Senior Benefits Analyst,324000,Reed Richards
 DIV3,People & Culture,Johnny Storm,AO 21,324002,Compensation Analyst,324000,Reed Richards
 DIV3,People & Culture,Ben Grimm,AO 21,324003,Pensions Administrator,324000,Reed Richards
-DIV3,People & Culture,Victor Von Doom,AO 18,324004,Benefits Clerk,324000,Reed Richards
+DIV3,People & Culture,Vacant,AO 18,324004,Benefits Clerk,324000,Reed Richards
 DIV3,Legal & Privacy,Dinah Lance,Band 5,330000,Executive Director,300000,Liam McIntyre
 DIV3,Legal & Privacy,Alec Holland,Band 4,331000,Director Privacy Compliance,330000,Dinah Lance
 DIV3,Legal & Privacy,Abby Arcane,AO 24,331001,Senior FOIPPA Analyst,331000,Alec Holland
@@ -332,7 +381,7 @@ DIV3,Legal & Privacy,Matt Cable,AO 21,331002,Privacy Analyst,331000,Alec Holland
 DIV3,Corporate IT,Tony Stark,Band 5,340000,Executive Director IT,300000,Liam McIntyre
 DIV3,Corporate IT,James Rhodes,Band 4,341000,Director Service Desk,340000,Tony Stark
 DIV3,Corporate IT,Pepper Potts,IS 24,341001,IT Service Manager,341000,James Rhodes
-DIV3,Corporate IT,Happy Hogan,IS 21,341002,Tier 2 Support,341000,James Rhodes
+DIV3,Corporate IT,Vacant,IS 21,341002,Tier 2 Support,341000,James Rhodes
 DIV3,Corporate IT,Peter Parker,IS 21,341003,Tier 1 Support,341000,James Rhodes
 DIV3,Corporate IT,Ned Leeds,IS 21,341004,Tier 1 Support,341000,James Rhodes
 DIV3,Corporate IT,MJ Watson,IS 21,341005,Tier 1 Support,341000,James Rhodes
@@ -342,7 +391,7 @@ DIV3,Facilities Management,Harvey Bullock,Band 4,351000,Director Building Ops,35
 DIV3,Facilities Management,Renee Montoya,AO 24,351001,Senior Facilities Mgr,351000,Harvey Bullock
 DIV3,Facilities Management,Crispus Allen,AO 21,351002,Building Supervisor,351000,Harvey Bullock
 DIV3,Facilities Management,Sarah Essen,AO 21,351003,Maintenance Coord,351000,Harvey Bullock
-DIV3,Facilities Management,Michael Akins,AO 18,351004,Facilities Clerk,351000,Harvey Bullock
+DIV3,Facilities Management,Vacant,AO 18,351004,Facilities Clerk,351000,Harvey Bullock
 DIV3,Facilities Management,Maggie Sawyer,Band 4,352000,Director Corporate Security,350000,James Gordon
 DIV3,Facilities Management,Dan Turpin,AO 24,352001,Chief Security Officer,352000,Maggie Sawyer
 DIV3,Facilities Management,Jason Bard,AO 21,352002,Security Supervisor,352000,Maggie Sawyer
@@ -355,25 +404,25 @@ DIV3,Corporate Communications,Perry White,Band 4,361000,Director Media Relations
 DIV3,Corporate Communications,Jimmy Olsen,AO 24,361001,Senior Press Secretary,361000,Perry White
 DIV3,Corporate Communications,Cat Grant,AO 24,361002,Public Relations Mgr,361000,Perry White
 DIV3,Corporate Communications,Ron Troupe,AO 21,361003,Media Specialist,361000,Perry White
-DIV3,Corporate Communications,Steve Lombard,AO 21,361004,Media Specialist,361000,Perry White
+DIV3,Corporate Communications,Vacant,AO 21,361004,Media Specialist,361000,Perry White
 DIV3,Corporate Communications,Lucy Lane,Band 4,362000,Director Internal Comm,360000,Lois Lane
 DIV3,Corporate Communications,Chloe Sullivan,AO 24,362001,Intranet Manager,362000,Lucy Lane
 DIV3,Corporate Communications,Pete Ross,AO 21,362002,Content Writer,362000,Lucy Lane
 DIV3,Corporate Communications,Lana Lang,AO 21,362003,Content Writer,362000,Lucy Lane
 DIV3,Corporate Communications,Martha Kent,AO 18,362004,Communications Asst,362000,Lucy Lane
-DIV3,Corporate Communications,Jonathan Kent,AO 18,362005,Communications Asst,362000,Lucy Lane
+DIV3,Corporate Communications,Vacant,AO 18,362005,Communications Asst,362000,Lucy Lane
 DIV4,ADM Office,Sarah Connor,ADM,400000,Assistant Deputy Minister,100000,Julien Santos
 DIV4,ADM Office,John Connor,AO 18,400001,Divisional Coordinator,400000,Sarah Connor
 DIV4,Climate Action,Kyle Reese,Band 5,410000,Executive Director,400000,Sarah Connor
 DIV4,Climate Action,Miles Dyson,Band 4,411000,Director Emissions Tracking,410000,Kyle Reese
 DIV4,Climate Action,Tarissa Dyson,IS 24,411001,Environmental Data Analyst,411000,Miles Dyson
-DIV4,Climate Action,Danny Dyson,IS 21,411002,Junior Data Analyst,411000,Miles Dyson
+DIV4,Climate Action,Vacant,IS 21,411002,Junior Data Analyst,411000,Miles Dyson
 DIV4,Climate Action,Matt Murdock,Band 4,412000,Director Climate Policy,410000,Kyle Reese
 DIV4,Climate Action,Foggy Nelson,AO 24,412001,Senior Policy Analyst,412000,Matt Murdock
 DIV4,Climate Action,Karen Page,AO 24,412002,Policy Advisor,412000,Matt Murdock
 DIV4,Climate Action,Frank Castle,AO 21,412003,Regulatory Specialist,412000,Matt Murdock
 DIV4,Climate Action,Elektra Natchios,AO 21,412004,Policy Researcher,412000,Matt Murdock
-DIV4,Climate Action,Claire Temple,AO 21,412005,Consultation Coordinator,412000,Matt Murdock
+DIV4,Climate Action,Vacant,AO 21,412005,Consultation Coordinator,412000,Matt Murdock
 DIV4,Conservation,Marcus Wright,Band 5,420000,Executive Director,400000,Sarah Connor
 DIV4,Conservation,Blair Williams,Band 4,421000,Director Wildlife Protection,420000,Marcus Wright
 DIV4,Conservation,Barnes,AO 24,421001,Senior Conservation Officer,421000,Blair Williams
@@ -384,7 +433,7 @@ DIV4,Conservation,Jessica Jones,AO 24,422002,Senior Regional Ranger,422000,Luke 
 DIV4,Conservation,Colleen Wing,AO 21,422003,Park Ranger,422000,Luke Cage
 DIV4,Conservation,Misty Knight,AO 21,422004,Park Ranger,422000,Luke Cage
 DIV4,Conservation,Ward Meachum,AO 21,422005,Park Ranger,422000,Luke Cage
-DIV4,Conservation,Joy Meachum,AO 21,422006,Park Ranger,422000,Luke Cage
+DIV4,Conservation,Vacant,AO 21,422006,Park Ranger,422000,Luke Cage
 DIV4,Conservation,Davos,AO 18,422007,Seasonal Ranger,422000,Luke Cage
 DIV4,Conservation,Mary Walker,AO 18,422008,Seasonal Ranger,422000,Luke Cage
 DIV4,Environmental Assessment,Ripley,Band 5,430000,Executive Director,400000,Sarah Connor
@@ -399,11 +448,11 @@ DIV4,Environmental Assessment,Hudson,IS 27,432001,Lead Assessor,432000,Hicks
 DIV4,Environmental Assessment,Vasquez,IS 24,432002,Environmental Scientist,432000,Hicks
 DIV4,Environmental Assessment,Gorman,IS 24,432003,Field Inspector,432000,Hicks
 DIV4,Environmental Assessment,Apone,IS 21,432004,Assessment Analyst,432000,Hicks
-DIV4,Environmental Assessment,Drake,IS 21,432005,Assessment Analyst,432000,Hicks
+DIV4,Environmental Assessment,Vacant,IS 21,432005,Assessment Analyst,432000,Hicks
 DIV4,Environmental Assessment,Frost,IS 18,432006,Field Tech,432000,Hicks
 DIV4,Environmental Assessment,Dietrich,IS 18,432007,Field Tech,432000,Hicks
 DIV4,Environmental Assessment,Crowe,IS 18,432008,Field Tech,432000,Hicks
-DIV4,Environmental Assessment,Wierzbowski,IS 18,432009,Field Tech,432000,Hicks
+DIV4,Environmental Assessment,Vacant,IS 18,432009,Field Tech,432000,Hicks
 DIV4,Waste Management,Dutch Schaefer,Band 5,440000,Executive Director,400000,Sarah Connor
 DIV4,Waste Management,Al Dillon,Band 4,441000,Director Plastics,440000,Dutch Schaefer
 DIV4,Waste Management,Mac Eliot,AO 24,441001,Senior Policy Advisor,441000,Al Dillon
@@ -416,7 +465,7 @@ DIV4,Waste Management,Danny Archuleta,IS 27,442001,Lead Toxologist,442000,Mike H
 DIV4,Waste Management,Leona Cantrell,IS 24,442002,Chemical Inspector,442000,Mike Harrigan
 DIV4,Waste Management,Jerry Lambert,IS 24,442003,Chemical Inspector,442000,Mike Harrigan
 DIV4,Waste Management,Peter Keyes,IS 21,442004,Safety Analyst,442000,Mike Harrigan
-DIV4,Waste Management,Adam Garber,IS 21,442005,Safety Analyst,442000,Mike Harrigan
+DIV4,Waste Management,Vacant,IS 21,442005,Safety Analyst,442000,Mike Harrigan
 DIV4,Waste Management,King Willie,IS 18,442006,Site Tech,442000,Mike Harrigan
 DIV4,Waste Management,El Scorpio,IS 18,442007,Site Tech,442000,Mike Harrigan
 DIV2,ADM Office,Marcus Usman,ADM,500000,Assistant Deputy Minister,100000,Julien Santos
@@ -429,7 +478,7 @@ DIV2,Timber Operations,Peter Quill,Band 4,512000,Director Silviculture,510000,Na
 DIV2,Timber Operations,Gamora,AO 24,512001,Senior Forester,512000,Peter Quill
 DIV2,Timber Operations,Drax,AO 24,512002,Reforestation Specialist,512000,Peter Quill
 DIV2,Timber Operations,Rocket,AO 21,512003,Silviculture Technician,512000,Peter Quill
-DIV2,Timber Operations,Groot,AO 21,512004,Silviculture Technician,512000,Peter Quill
+DIV2,Timber Operations,Vacant,AO 21,512004,Silviculture Technician,512000,Peter Quill
 DIV2,Timber Operations,Mantis,AO 18,512005,Field Assistant,512000,Peter Quill
 DIV2,Timber Operations,Nebula,Band 4,513000,Director Licensing,510000,Nathan Drake
 DIV2,Timber Operations,Yondu Udonta,AO 24,513001,Senior Licensing Officer,513000,Nebula
@@ -444,7 +493,7 @@ DIV2,Wildfire Management,Thor Odinson,Band 4,522000,Director Fire Prevention,520
 DIV2,Wildfire Management,Loki Laufeyson,AO 24,522001,Senior Mitigation Specialist,522000,Thor Odinson
 DIV2,Wildfire Management,Valkyrie,AO 24,522002,Community Outreach Coord,522000,Thor Odinson
 DIV2,Wildfire Management,Heimdall,AO 21,522003,Risk Assessment Officer,522000,Thor Odinson
-DIV2,Wildfire Management,Sif,AO 21,522004,Fire Warden,522000,Thor Odinson
+DIV2,Wildfire Management,Vacant,AO 21,522004,Fire Warden,522000,Thor Odinson
 DIV2,Wildfire Management,Odin Borson,Band 4,523000,Director Aviation Ops,520000,Nadine Ross
 DIV2,Wildfire Management,Frigga,AO 24,523001,Chief Dispatcher,523000,Odin Borson
 DIV2,Wildfire Management,Balder,AO 24,523002,Aviation Safety Officer,523000,Odin Borson
@@ -457,7 +506,7 @@ DIV2,Forest Science,Boromir,IS 24,531002,Research Scientist,531000,Legolas
 DIV2,Forest Science,Faramir,IS 24,531003,Research Scientist,531000,Legolas
 DIV2,Forest Science,Theoden,IS 21,531004,Lab Technician,531000,Legolas
 DIV2,Forest Science,Eomer,IS 21,531005,Lab Technician,531000,Legolas
-DIV2,Forest Science,Eowyn,IS 21,531006,Lab Technician,531000,Legolas
+DIV2,Forest Science,Vacant,IS 21,531006,Lab Technician,531000,Legolas
 DIV2,Forest Science,Elrond,Band 4,532000,Director Ecology,530000,Aragorn
 DIV2,Forest Science,Galadriel,IS 27,532001,Lead Ecologist,532000,Elrond
 DIV2,Forest Science,Celeborn,IS 24,532002,Ecologist,532000,Elrond
@@ -468,7 +517,7 @@ DIV2,Forest Science,Thranduil,IS 21,532006,Field Biologist,532000,Elrond
 DIV2,Forest Science,Gil-galad,IS 18,532007,Field Assistant,532000,Elrond
 DIV2,Forest Science,Cirdan,IS 18,532008,Field Assistant,532000,Elrond
 DIV2,Forest Science,Isildur,IS 18,532009,Field Assistant,532000,Elrond
-DIV2,Forest Science,Elendil,IS 18,532010,Field Assistant,532000,Elrond
+DIV2,Forest Science,Vacant,IS 18,532010,Field Assistant,532000,Elrond
 DIV2,Recreation Sites,Gandalf,Band 5,540000,Executive Director,500000,Marcus Usman
 DIV2,Recreation Sites,Frodo Baggins,Band 4,541000,Director Trails,540000,Gandalf
 DIV2,Recreation Sites,Samwise Gamgee,AO 24,541001,Senior Trail Planner,541000,Frodo Baggins
@@ -483,7 +532,7 @@ DIV2,Recreation Sites,Smeagol,AO 21,542003,Site Supervisor,542000,Radagast
 DIV2,Recreation Sites,Treebeard,AO 18,542004,Camp Attendant,542000,Radagast
 DIV2,Recreation Sites,Barliman Butterbur,AO 18,542005,Camp Attendant,542000,Radagast
 DIV2,Recreation Sites,Tom Bombadil,AO 18,542006,Camp Attendant,542000,Radagast
-DIV2,Recreation Sites,Goldberry,AO 18,542007,Camp Attendant,542000,Radagast
+DIV2,Recreation Sites,Vacant,AO 18,542007,Camp Attendant,542000,Radagast
 DIV1,ADM Office,John Doe,ADM,600000,Assistant Deputy Minister,100000,Julien Santos
 DIV1,ADM Office,Jane Smith,AO 18,600001,Divisional Coordinator,600000,John Doe
 DIV1,Water Management,Alan Grant,Band 5,610000,Executive Director,600000,John Doe
@@ -504,7 +553,7 @@ DIV1,Land Stewardship,Erik Killmonger,Band 4,623000,Director Indigenous Relation
 DIV1,Land Stewardship,W'Kabi,AO 24,623001,Senior Engagement Advisor,623000,Erik Killmonger
 DIV1,Land Stewardship,Ayo,AO 24,623002,Consultation Specialist,623000,Erik Killmonger
 DIV1,Land Stewardship,Aneka,AO 21,623003,Engagement Coordinator,623000,Erik Killmonger
-DIV1,Land Stewardship,Zuri,AO 21,623004,Policy Advisor,623000,Erik Killmonger
+DIV1,Land Stewardship,Vacant,AO 21,623004,Policy Advisor,623000,Erik Killmonger
 DIV1,Marine Boundaries,Arthur Pendragon,Band 5,630000,Executive Director,600000,John Doe
 DIV1,Marine Boundaries,Merlin,Band 4,631000,Director Coastal,630000,Arthur Pendragon
 DIV1,Marine Boundaries,Lancelot,IS 27,631001,Lead Marine Biologist,631000,Merlin
@@ -519,14 +568,14 @@ DIV1,Marine Boundaries,Uther,IS 24,632002,Estuary Scientist,632000,Morgan le Fay
 DIV1,Marine Boundaries,Igraine,IS 24,632003,Estuary Scientist,632000,Morgan le Fay
 DIV1,Marine Boundaries,Viviane,IS 21,632004,Field Tech,632000,Morgan le Fay
 DIV1,Marine Boundaries,Nimue,IS 21,632005,Field Tech,632000,Morgan le Fay
-DIV1,Marine Boundaries,Elaine,IS 21,632006,Field Tech,632000,Morgan le Fay
+DIV1,Marine Boundaries,Vacant,IS 21,632006,Field Tech,632000,Morgan le Fay
 DIV1,Species at Risk,Robin Hood,Band 5,640000,Executive Director,600000,John Doe
 DIV1,Species at Risk,Little John,Band 4,641000,Director Recovery,640000,Robin Hood
 DIV1,Species at Risk,Will Scarlet,IS 27,641001,Lead Recovery Spec,641000,Little John
 DIV1,Species at Risk,Friar Tuck,IS 24,641002,Recovery Biologist,641000,Little John
 DIV1,Species at Risk,Much,IS 24,641003,Recovery Biologist,641000,Little John
 DIV1,Species at Risk,Arthur a Bland,IS 21,641004,Field Coord,641000,Little John
-DIV1,Species at Risk,David of Doncaster,IS 21,641005,Field Coord,641000,Little John
+DIV1,Species at Risk,Vacant,IS 21,641005,Field Coord,641000,Little John
 DIV1,Species at Risk,Maid Marian,Band 4,642000,Director Monitoring,640000,Robin Hood
 DIV1,Species at Risk,Alan-a-Dale,IS 27,642001,Lead Monitoring Spec,642000,Maid Marian
 DIV1,Species at Risk,Guy of Gisborne,IS 24,642002,Monitoring Biologist,642000,Maid Marian
@@ -535,7 +584,7 @@ DIV1,Species at Risk,Prince John,IS 21,642004,Data Collector,642000,Maid Marian
 DIV1,Species at Risk,King Richard,IS 21,642005,Data Collector,642000,Maid Marian
 DIV1,Species at Risk,Queen Eleanor,IS 21,642006,Data Collector,642000,Maid Marian
 DIV1,Species at Risk,Gilbert Whitehand,IS 18,642007,Field Assistant,642000,Maid Marian
-DIV1,Species at Risk,Reynold Greenleaf,IS 18,642008,Field Assistant,642000,Maid Marian`;
+DIV1,Species at Risk,Vacant,IS 18,642008,Field Assistant,642000,Maid Marian`;
 
         // Utility algorithm to assign organizational ranking weight for sorting
         function getClassificationWeight(classification) {
@@ -604,97 +653,87 @@ DIV1,Species at Risk,Reynold Greenleaf,IS 18,642008,Field Assistant,642000,Maid 
             });
 
             // IDENTIFY ADMINISTRATIVE SUPPORT STAFF
-        // People who report directly to a DM or ADM, but are not Executives themselves
-        const execIds = new Set(nodes.filter(n => {
-            const cls = (n.classification || '').toUpperCase();
-            return cls.includes('DM') || cls.includes('ADM');
-        }).map(n => n.id));
-        
-        nodes.forEach(n => {
-            const cls = (n.classification || '').toUpperCase();
-            const title = (n.title || '').toUpperCase();
+            const execIds = new Set(nodes.filter(n => {
+                const cls = (n.classification || '').toUpperCase();
+                return cls.includes('DM') || cls.includes('ADM');
+            }).map(n => n.id));
             
-            if (execIds.has(n.parentId)) {
-                // Exclude high-level management bands and directors from being marked as "support"
-                const isExecutive = cls.includes('DM') || 
-                                    cls.includes('ADM') || 
-                                    cls.includes('BAND 5') || 
-                                    cls.includes('BAND 4') || 
-                                    cls.includes('BAND 3') || 
-                                    title.includes('DIRECTOR');
+            nodes.forEach(n => {
+                const cls = (n.classification || '').toUpperCase();
+                const title = (n.title || '').toUpperCase();
                 
-                if (!isExecutive) {
-                    n.isAdministrative = true;
+                if (execIds.has(n.parentId)) {
+                    const isExecutive = cls.includes('DM') || 
+                                        cls.includes('ADM') || 
+                                        cls.includes('BAND 5') || 
+                                        cls.includes('BAND 4') || 
+                                        cls.includes('BAND 3') || 
+                                        title.includes('DIRECTOR');
+                    
+                    if (!isExecutive) {
+                        n.isAdministrative = true;
+                    }
                 }
-            }
-        });
+            });
 
-        return nodes;
-    }
+            return nodes;
+        }
 
-    // Color palette based on Divisions instead of generic branches
-    const divisionColors = {
-        'Ministry Executive': '#0f172a', // Slate 900
-        'NRRIS': '#2563eb', // Blue 600
-        'DIV3': '#059669', // Emerald 600
-        'DIV4': '#d97706', // Amber 600
-        'DIV2': '#7c3aed', // Violet 600
-        'DIV1': '#db2777' // Pink 600
-    };
+        // Color palette based on Divisions
+        const divisionColors = {
+            'Ministry Executive': '#0f172a', // Slate 900
+            'NRRIS': '#2563eb', // Blue 600
+            'DIV3': '#059669', // Emerald 600
+            'DIV4': '#d97706', // Amber 600
+            'DIV2': '#7c3aed', // Violet 600
+            'DIV1': '#db2777' // Pink 600
+        };
 
-    function getDivisionColor(divisionName) {
-        return divisionColors[divisionName] || '#475569'; // Default Slate 600
-    }
+        function getDivisionColor(divisionName) {
+            return divisionColors[divisionName] || '#475569'; // Default Slate 600
+        }
 
-    // Added Layout Management
         let isVertical = true;
         function toggleLayout() {
             isVertical = !isVertical;
             chart.layout(isVertical ? 'top' : 'left').render().fit();
         }
 
-        // Structure Dropdown Filters Management
         let activeDivision = "";
 
         function populateFilters() {
-            const divisionButtonsContainer = document.getElementById('divisionButtons');
+            const divisionSelect = document.getElementById('divisionSelect');
             const divisions = [...new Set(globalData.map(d => d.division))].filter(Boolean).sort();
             
-            divisionButtonsContainer.innerHTML = '';
+            divisionSelect.innerHTML = '<option value="">-- Select Division --</option>';
             divisions.forEach(div => {
-                const btn = document.createElement('button');
-                btn.className = 'px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold rounded-lg transition-colors border border-transparent';
-                btn.textContent = div;
-                btn.onclick = () => selectDivision(div, btn);
-                divisionButtonsContainer.appendChild(btn);
+                const opt = document.createElement('option');
+                opt.value = div;
+                opt.textContent = div;
+                divisionSelect.appendChild(opt);
             });
             
-            const branchFilterContainer = document.getElementById('branchFilterContainer');
-            branchFilterContainer.classList.add('hidden');
+            const branchSelect = document.getElementById('branchSelect');
+            branchSelect.innerHTML = '<option value="">-- Select Branch --</option>';
+            branchSelect.classList.add('hidden');
         }
 
-        function selectDivision(selectedDiv, btnElement) {
+        document.getElementById('divisionSelect').addEventListener('change', function(e) {
+            const selectedDiv = e.target.value;
             activeDivision = selectedDiv;
-            
-            // Update button styles to highlight the active pill
-            const buttons = document.getElementById('divisionButtons').querySelectorAll('button');
-            buttons.forEach(b => {
-                b.classList.remove('bg-blue-100', 'text-blue-700', 'border-blue-300');
-                b.classList.add('bg-slate-100', 'text-slate-600');
-            });
-            btnElement.classList.remove('bg-slate-100', 'text-slate-600');
-            btnElement.classList.add('bg-blue-100', 'text-blue-700', 'border-blue-300');
-
-            const branchFilterContainer = document.getElementById('branchFilterContainer');
             const branchSelect = document.getElementById('branchSelect');
             
-            // Highlight and expand the chosen Division
+            if (!selectedDiv) {
+                branchSelect.classList.add('hidden');
+                resetFilters();
+                return;
+            }
+
             highlightTeam('division', selectedDiv);
 
-            // Populate the Branch dropdown based on the chosen Division
             const branches = [...new Set(globalData.filter(d => d.division === selectedDiv).map(d => d.branch))].filter(Boolean).sort();
             
-            branchSelect.innerHTML = '<option value="">-- Explore Branches --</option>';
+            branchSelect.innerHTML = '<option value="">-- Select Branch --</option>';
             branches.forEach(branch => {
                 const opt = document.createElement('option');
                 opt.value = branch;
@@ -703,75 +742,55 @@ DIV1,Species at Risk,Reynold Greenleaf,IS 18,642008,Field Assistant,642000,Maid 
             });
             
             if (branches.length > 0) {
-                branchFilterContainer.classList.remove('hidden');
+                branchSelect.classList.remove('hidden');
             } else {
-                branchFilterContainer.classList.add('hidden');
+                branchSelect.classList.add('hidden');
             }
-        }
+        });
 
         document.getElementById('branchSelect').addEventListener('change', function(e) {
             const selectedBranch = e.target.value;
             if (selectedBranch) {
                 highlightTeam('branch', selectedBranch);
             } else {
-                // If branch is deselected, fallback to highlighting the current Division
                 highlightTeam('division', activeDivision);
             }
         });
 
         function collapseToTopLevel() {
             chart.collapseAll();
-            
-            // Open default hierarchy (e.g. up to ADMs)
             const rootNode = globalData.find(d => !d.parentId);
             if (rootNode) {
                 chart.setExpanded(rootNode.id);
-                // Also expand the direct children so we see the divisions
                 const directChildren = globalData.filter(d => d.parentId === rootNode.id);
                 directChildren.forEach(child => chart.setExpanded(child.id));
             }
-            
             chart.render().fit();
         }
 
         function resetFilters() {
             activeDivision = "";
-            const buttons = document.getElementById('divisionButtons').querySelectorAll('button');
-            buttons.forEach(b => {
-                b.classList.remove('bg-blue-100', 'text-blue-700', 'border-blue-300');
-                b.classList.add('bg-slate-100', 'text-slate-600');
-            });
-            
-            document.getElementById('branchFilterContainer').classList.add('hidden');
+            document.getElementById('divisionSelect').value = '';
+            document.getElementById('branchSelect').classList.add('hidden');
             document.getElementById('branchSelect').innerHTML = '<option value="">-- Select Branch --</option>';
-            
-            // Reset search input
             document.getElementById('searchInput').value = '';
             document.getElementById('searchResults').classList.add('hidden');
             
-            // Clear highlights and collapse everything
             chart.clearHighlighting();
             globalData.forEach(d => d._highlightedTeam = false);
             collapseToTopLevel();
         }
 
-        // Initialize the Chart
         function renderChart(data) {
             globalData = data;
-            
-            // Update the live employee count
             document.getElementById('employee-count').textContent = `${data.length} Employees loaded`;
-            
-            // Populate our new structure filters
             populateFilters();
             
             if (chart) {
-                // If chart already exists, just update data
                 chart.data(data).render().fit();
                 return;
             }
 
-            // Create new chart
             chart = new d3.OrgChart()
                 .container('#chart-container')
                 .data(data)
@@ -796,39 +815,45 @@ DIV1,Species at Risk,Reynold Greenleaf,IS 18,642008,Field Assistant,642000,Maid 
                         });
                 })
                 .nodeContent(function(d, i, arr, state) {
-                    const color = getDivisionColor(d.data.division);
-                    const initials = d.data.name && d.data.name.trim() ? d.data.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase() : '??';
-                    
+                    let color = getDivisionColor(d.data.division);
                     const isHighlighted = d.data._highlightedTeam;
                     const isAdmin = d.data.isAdministrative;
+                    
+                    // Logic for Vacant Roles
+                    const isVacant = d.data.name && d.data.name.toUpperCase().includes('VACANT');
                     
                     let cardStyle = `border: 1px solid #e2e8f0; background-color: white;`;
                     if (isHighlighted) {
                         cardStyle = `border: 2px solid ${color}; box-shadow: 0 0 20px ${color}60; transform: scale(1.02); background-color: #f8fafc;`;
+                    } else if (isVacant) {
+                        cardStyle = `border: 2px dashed #cbd5e1; background-color: #f8fafc; opacity: 0.8;`;
+                        color = '#94a3b8'; // Slate gray for vacant
                     } else if (isAdmin) {
-                        // Apply distinct visual styling for support staff
                         cardStyle = `border: 2px dashed ${color}; background-color: #f8fafc; opacity: 0.95;`;
                     }
                     
-                    // Direct Support Badge
-                    const adminBadge = isAdmin ? `<div style="position: absolute; top: 12px; right: 12px; background-color: ${color}20; color: ${color}; font-size: 8px; font-weight: 800; padding: 3px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Direct Support</div>` : '';
+                    const initials = isVacant ? '?' : (d.data.name && d.data.name.trim() ? d.data.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase() : '??');
                     
+                    const badge = isVacant ? `<div style="position: absolute; top: 12px; right: 12px; background-color: #f1f5f9; color: #64748b; font-size: 8px; font-weight: 800; padding: 3px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #e2e8f0;">Vacant</div>` : 
+                                  (isAdmin ? `<div style="position: absolute; top: 12px; right: 12px; background-color: ${color}20; color: ${color}; font-size: 8px; font-weight: 800; padding: 3px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Direct Support</div>` : '');
+                    
+                    // Logic for Rollup Headcounts
+                    const directReports = d.data._directSubordinates || 0;
+                    const totalTeam = d.data._totalSubordinates || 0;
+
                     return `
                     <div class="node-card" style="font-family: ui-sans-serif, system-ui, sans-serif; ${cardStyle} border-radius: 12px; width: ${d.width}px; height: ${d.height}px; display: flex; flex-direction: column; overflow: hidden; cursor: pointer; position: relative; transition: all 0.2s ease;">
-                        <!-- Division Color Bar -->
                         <div style="height: 6px; width: 100%; background-color: ${color};"></div>
                         
-                        ${adminBadge}
+                        ${badge}
                         
                         <div style="padding: 16px; display: flex; align-items: center; gap: 12px; flex: 1;">
-                            <!-- Avatar -->
-                            <div style="width: 48px; height: 48px; border-radius: 9999px; background-color: #f1f5f9; display: flex; align-items: center; justify-content: center; font-weight: bold; color: ${color}; font-size: 16px; border: 1px solid #e2e8f0; flex-shrink: 0;">
+                            <div style="width: 48px; height: 48px; border-radius: 9999px; background-color: ${isVacant ? '#f1f5f9' : '#f1f5f9'}; display: flex; align-items: center; justify-content: center; font-weight: bold; color: ${color}; font-size: 16px; border: 1px solid #e2e8f0; flex-shrink: 0;">
                                 ${initials}
                             </div>
                             
-                            <!-- Text Data -->
-                            <div style="overflow: hidden; padding-right: ${isAdmin ? '20px' : '0'};">
-                                <div style="font-weight: 700; font-size: 15px; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            <div style="overflow: hidden; padding-right: ${(isAdmin || isVacant) ? '30px' : '0'};">
+                                <div style="font-weight: 700; font-size: 15px; color: ${isVacant ? '#64748b' : '#0f172a'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                     ${d.data.name}
                                 </div>
                                 <div style="font-size: 12px; color: #475569; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
@@ -840,8 +865,7 @@ DIV1,Species at Risk,Reynold Greenleaf,IS 18,642008,Field Assistant,642000,Maid 
                             </div>
                         </div>
 
-                        <!-- Expand/Collapse Indicator -->
-                        ${d.data._directSubordinates > 0 ? `
+                        ${totalTeam > 0 ? `
                         <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 24px; background-color: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #64748b; font-weight: 500;">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
                                 <path d="M17 21v-2a4 4 0 0 0-4-4H5"></path>
@@ -850,7 +874,7 @@ DIV1,Species at Risk,Reynold Greenleaf,IS 18,642008,Field Assistant,642000,Maid 
                                 <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                                 <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                             </svg>
-                            ${d.data._directSubordinates} Reports
+                            Direct: ${directReports} &nbsp;|&nbsp; Team: ${totalTeam}
                         </div>
                         ` : ''}
                     </div>
@@ -862,7 +886,6 @@ DIV1,Species at Risk,Reynold Greenleaf,IS 18,642008,Field Assistant,642000,Maid 
                 })
                 .render();
 
-            // Set the default view to collapsed (Top level only) instead of expandAll
             collapseToTopLevel();
         }
 
@@ -999,7 +1022,6 @@ DIV1,Species at Risk,Reynold Greenleaf,IS 18,642008,Field Assistant,642000,Maid 
 
         function highlightTeam(type, value) {
             searchResults.classList.add('hidden');
-            // Check if we are searching or clicking the dropdown
             if (document.getElementById('searchInput').value) {
                 document.getElementById('searchInput').value = value;
             }
@@ -1032,9 +1054,7 @@ DIV1,Species at Risk,Reynold Greenleaf,IS 18,642008,Field Assistant,642000,Maid 
             });
 
             chart.render();
-            setTimeout(() => {
-                chart.fit();
-            }, 300);
+            setTimeout(() => chart.fit(), 300);
             
             closeProfile();
         }
@@ -1045,14 +1065,53 @@ DIV1,Species at Risk,Reynold Greenleaf,IS 18,642008,Field Assistant,642000,Maid 
             }
         });
 
+        // Interactive Breadcrumb Function for the Global Scope
+        window.jumpToNode = function(id) {
+            const nodeData = globalData.find(n => n.id === id);
+            if (nodeData) {
+                chart.setCentered(id).render();
+                showProfile(nodeData);
+            }
+        };
+
         const profilePanel = document.getElementById('profilePanel');
         
         function showProfile(data) {
-            const initials = data.name && data.name.trim() ? data.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase() : '??';
+            // Build the Breadcrumb Chain
+            let chain = [];
+            let current = data;
+            while(current && current.id !== 'SYSTEM_ROOT') {
+                chain.unshift(current);
+                current = globalData.find(n => n.id === current.parentId);
+            }
+
+            const chainHtml = chain.map((node, index) => {
+                const isLast = index === chain.length - 1;
+                return `
+                    <div class="flex items-start gap-3 ${isLast ? 'text-blue-600' : 'text-slate-500 hover:text-blue-500 cursor-pointer'} transition-colors" ${!isLast ? `onclick="window.jumpToNode('${node.id}')"` : ''}>
+                        <div class="flex flex-col items-center mt-1">
+                            <div class="w-2.5 h-2.5 rounded-full ${isLast ? 'bg-blue-600 ring-4 ring-blue-100' : 'bg-slate-300'}"></div>
+                            ${!isLast ? '<div class="w-0.5 h-6 bg-slate-200 my-1"></div>' : ''}
+                        </div>
+                        <div class="pb-2 leading-tight flex-1">
+                            <div class="${isLast ? 'font-bold' : 'font-medium'} text-[13px]">${node.name}</div>
+                            <div class="text-[10px] uppercase tracking-wider opacity-80">${node.title}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('profileChain').innerHTML = chainHtml;
+
+            // Fill standard profile info
+            const isVacant = data.name && data.name.toUpperCase().includes('VACANT');
+            const initials = isVacant ? '?' : (data.name && data.name.trim() ? data.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase() : '??');
             
             document.getElementById('profileAvatar').textContent = initials;
-            document.getElementById('profileAvatar').style.color = getDivisionColor(data.division);
+            document.getElementById('profileAvatar').style.color = isVacant ? '#94a3b8' : getDivisionColor(data.division);
+            document.getElementById('profileAvatar').style.backgroundColor = '#f1f5f9';
+            
             document.getElementById('profileName').textContent = data.name || 'Unknown';
+            document.getElementById('profileName').style.color = isVacant ? '#64748b' : '#0f172a';
             document.getElementById('profileTitle').textContent = data.title || 'Unknown Position';
             document.getElementById('profileBranch').textContent = `${data.division} • ${data.branch}`;
             
